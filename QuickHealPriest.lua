@@ -79,10 +79,10 @@ function QuickHeal_Priest_FindHealSpellToUse(Target, healType, multiplier, force
     QuickHeal_debug(string.format("Spiritual Guidance Bonus: %f", sgMod));
 
     -- Calculate healing bonus
-    local healMod15 = (1.5/3.5) * (sgMod + Bonus);
-    local healMod20 = (2.0/3.5) * (sgMod + Bonus);
-    local healMod25 = (2.5/3.5) * (sgMod + Bonus);
-    local healMod30 = (3.0/3.5) * (sgMod + Bonus);
+    local healMod15 = (1.5/3.5) * (sgMod + Bonus) * 0.85;
+    local healMod20 = (2.0/3.5) * (sgMod + Bonus) * 0.85;
+    local healMod25 = (2.5/3.5) * (sgMod + Bonus) * 0.85;
+    local healMod30 = (3.0/3.5) * (sgMod + Bonus) * 0.85;
     QuickHeal_debug("Final Healing Bonus (1.5,2.0,2.5,3.0)", healMod15,healMod20,healMod25,healMod30);
 
     local InCombat = UnitAffectingCombat('player') or UnitAffectingCombat(Target);
@@ -377,7 +377,7 @@ function QuickHeal_Priest_FindHoTSpellToUse(Target, healType, forceMaxRank)
     if (AceLibrary and AceLibrary:HasInstance("ItemBonusLib-1.0")) then
         local itemBonus = AceLibrary("ItemBonusLib-1.0")
         Bonus = itemBonus:GetBonus("HEAL") or 0
-        debug(string.format("Equipment Healing Bonus: %d", Bonus))
+        QuickHeal_debug(string.format("Equipment Healing Bonus: %d", Bonus))
     end
 
     -- Spiritual Guidance - Increases spell damage and healing by up to 5% (per rank) of your total Spirit.
@@ -502,16 +502,16 @@ function QuickHeal_Priest_FindHoTSpellToUse(Target, healType, forceMaxRank)
         --if Health < QuickHealVariables.RatioFull then
         --if Health > QuickHealVariables.RatioHealthyPriest then
         if not forceMaxRank then
-            SpellID = SpellIDsR[1]; HealSize = (45+healMod15)*shMod; -- Default to Renew(Rank 1)
-            if healneed > (100+healMod15)*k*shMod and ManaLeft >= 155 and maxRankR >=2  and SpellIDsR[2]  then SpellID = SpellIDsR[2];  HealSize = (100+healMod15)*shMod end
-            if healneed > (175+healMod15)*k*shMod and ManaLeft >= 185 and maxRankR >=3  and SpellIDsR[3]  then SpellID = SpellIDsR[3];  HealSize = (175+healMod15)*shMod end
-            if healneed > (245+healMod15)*k*shMod and ManaLeft >= 215 and maxRankR >=4  and SpellIDsR[4]  then SpellID = SpellIDsR[4];  HealSize = (245+healMod15)*shMod end
-            if healneed > (270+healMod15)*k*shMod and ManaLeft >= 265 and maxRankR >=5  and SpellIDsR[5]  then SpellID = SpellIDsR[5];  HealSize = (270+healMod15)*shMod end
-            if healneed > (340+healMod15)*k*shMod and ManaLeft >= 315 and maxRankR >=6  and SpellIDsR[6]  then SpellID = SpellIDsR[6];  HealSize = (340+healMod15)*shMod end
-            if healneed > (435+healMod15)*k*shMod and ManaLeft >= 380 and maxRankR >=7  and SpellIDsR[7]  then SpellID = SpellIDsR[7];  HealSize = (435+healMod15)*shMod end
-            if healneed > (555+healMod15)*k*shMod and ManaLeft >= 455 and maxRankR >=8  and SpellIDsR[8]  then SpellID = SpellIDsR[8];  HealSize = (555+healMod15)*shMod end
-            if healneed > (690+healMod15)*k*shMod and ManaLeft >= 545 and maxRankR >=9  and SpellIDsR[9]  then SpellID = SpellIDsR[9];  HealSize = (690+healMod15)*shMod end
-            if healneed > (825+healMod15)*k*shMod and ManaLeft >= 655 and maxRankR >=10 and SpellIDsR[10] then SpellID = SpellIDsR[10]; HealSize = (825+healMod15)*shMod end
+            SpellID = SpellIDsR[1]; HealSize = (45+healMod30)*shMod; -- Default to Renew(Rank 1)
+            if healneed > (100+healMod30)*k*shMod and ManaLeft >= 65  and maxRankR >=2  and SpellIDsR[2]  then SpellID = SpellIDsR[2];  HealSize = (100+healMod30)*shMod end
+            if healneed > (175+healMod30)*k*shMod and ManaLeft >= 105 and maxRankR >=3  and SpellIDsR[3]  then SpellID = SpellIDsR[3];  HealSize = (175+healMod30)*shMod end
+            if healneed > (245+healMod30)*k*shMod and ManaLeft >= 140 and maxRankR >=4  and SpellIDsR[4]  then SpellID = SpellIDsR[4];  HealSize = (245+healMod30)*shMod end
+            if healneed > (270+healMod30)*k*shMod and ManaLeft >= 170 and maxRankR >=5  and SpellIDsR[5]  then SpellID = SpellIDsR[5];  HealSize = (270+healMod30)*shMod end
+            if healneed > (340+healMod30)*k*shMod and ManaLeft >= 205 and maxRankR >=6  and SpellIDsR[6]  then SpellID = SpellIDsR[6];  HealSize = (340+healMod30)*shMod end
+            if healneed > (435+healMod30)*k*shMod and ManaLeft >= 250 and maxRankR >=7  and SpellIDsR[7]  then SpellID = SpellIDsR[7];  HealSize = (435+healMod30)*shMod end
+            if healneed > (555+healMod30)*k*shMod and ManaLeft >= 305 and maxRankR >=8  and SpellIDsR[8]  then SpellID = SpellIDsR[8];  HealSize = (555+healMod30)*shMod end
+            if healneed > (690+healMod30)*k*shMod and ManaLeft >= 365 and maxRankR >=9  and SpellIDsR[9]  then SpellID = SpellIDsR[9];  HealSize = (690+healMod30)*shMod end
+            if healneed > (825+healMod30)*k*shMod and ManaLeft >= 410 and maxRankR >=10 and SpellIDsR[10] then SpellID = SpellIDsR[10]; HealSize = (825+healMod30)*shMod end
         else
             SpellID = SpellIDsR[10]; HealSize = (825+healMod15)*shMod
             if maxRankR >=2  and SpellIDsR[2]  then SpellID = SpellIDsR[2];  HealSize = (100+healMod15)*shMod end
@@ -549,7 +549,7 @@ function QuickHeal_Priest_FindHoTSpellToUseNoTarget(maxhealth, healDeficit, heal
     if (AceLibrary and AceLibrary:HasInstance("ItemBonusLib-1.0")) then
         local itemBonus = AceLibrary("ItemBonusLib-1.0")
         Bonus = itemBonus:GetBonus("HEAL") or 0
-        debug(string.format("Equipment Healing Bonus: %d", Bonus))
+        QuickHeal_debug(string.format("Equipment Healing Bonus: %d", Bonus))
     end
 
     -- Spiritual Guidance - Increases spell damage and healing by up to 5% (per rank) of your total Spirit.
@@ -636,15 +636,15 @@ function QuickHeal_Priest_FindHoTSpellToUseNoTarget(maxhealth, healDeficit, heal
     end
 
     SpellID = SpellIDsR[1]; HealSize = (45+healMod15)*shMod; -- Default to Renew(Rank 1)
-    if healneed > (100+healMod15)*k*shMod and ManaLeft >= 155 and maxRankR >=2  and SpellIDsR[2]  then SpellID = SpellIDsR[2];  HealSize = (100+healMod15)*shMod end
-    if healneed > (175+healMod15)*k*shMod and ManaLeft >= 185 and maxRankR >=3  and SpellIDsR[3]  then SpellID = SpellIDsR[3];  HealSize = (175+healMod15)*shMod end
-    if healneed > (245+healMod15)*k*shMod and ManaLeft >= 215 and maxRankR >=4  and SpellIDsR[4]  then SpellID = SpellIDsR[4];  HealSize = (245+healMod15)*shMod end
-    if healneed > (270+healMod15)*k*shMod and ManaLeft >= 265 and maxRankR >=5  and SpellIDsR[5]  then SpellID = SpellIDsR[5];  HealSize = (270+healMod15)*shMod end
-    if healneed > (340+healMod15)*k*shMod and ManaLeft >= 315 and maxRankR >=6  and SpellIDsR[6]  then SpellID = SpellIDsR[6];  HealSize = (340+healMod15)*shMod end
-    if healneed > (435+healMod15)*k*shMod and ManaLeft >= 380 and maxRankR >=7  and SpellIDsR[7]  then SpellID = SpellIDsR[7];  HealSize = (435+healMod15)*shMod end
-    if healneed > (555+healMod15)*k*shMod and ManaLeft >= 455 and maxRankR >=8  and SpellIDsR[8]  then SpellID = SpellIDsR[8];  HealSize = (555+healMod15)*shMod end
-    if healneed > (690+healMod15)*k*shMod and ManaLeft >= 545 and maxRankR >=9  and SpellIDsR[9]  then SpellID = SpellIDsR[9];  HealSize = (690+healMod15)*shMod end
-    if healneed > (825+healMod15)*k*shMod and ManaLeft >= 655 and maxRankR >=10 and SpellIDsR[10] then SpellID = SpellIDsR[10]; HealSize = (825+healMod15)*shMod end
+    if healneed > (100+healMod30)*k*shMod and ManaLeft >= 65  and maxRankR >=2  and SpellIDsR[2]  then SpellID = SpellIDsR[2];  HealSize = (100+healMod30)*shMod end
+    if healneed > (175+healMod30)*k*shMod and ManaLeft >= 105 and maxRankR >=3  and SpellIDsR[3]  then SpellID = SpellIDsR[3];  HealSize = (175+healMod30)*shMod end
+    if healneed > (245+healMod30)*k*shMod and ManaLeft >= 140 and maxRankR >=4  and SpellIDsR[4]  then SpellID = SpellIDsR[4];  HealSize = (245+healMod30)*shMod end
+    if healneed > (270+healMod30)*k*shMod and ManaLeft >= 170 and maxRankR >=5  and SpellIDsR[5]  then SpellID = SpellIDsR[5];  HealSize = (270+healMod30)*shMod end
+    if healneed > (340+healMod30)*k*shMod and ManaLeft >= 205 and maxRankR >=6  and SpellIDsR[6]  then SpellID = SpellIDsR[6];  HealSize = (340+healMod30)*shMod end
+    if healneed > (435+healMod30)*k*shMod and ManaLeft >= 250 and maxRankR >=7  and SpellIDsR[7]  then SpellID = SpellIDsR[7];  HealSize = (435+healMod30)*shMod end
+    if healneed > (555+healMod30)*k*shMod and ManaLeft >= 305 and maxRankR >=8  and SpellIDsR[8]  then SpellID = SpellIDsR[8];  HealSize = (555+healMod30)*shMod end
+    if healneed > (690+healMod30)*k*shMod and ManaLeft >= 365 and maxRankR >=9  and SpellIDsR[9]  then SpellID = SpellIDsR[9];  HealSize = (690+healMod30)*shMod end
+    if healneed > (825+healMod30)*k*shMod and ManaLeft >= 410 and maxRankR >=10 and SpellIDsR[10] then SpellID = SpellIDsR[10]; HealSize = (825+healMod30)*shMod end
 
     return SpellID,HealSize*hdb;
 end
@@ -679,7 +679,7 @@ function QuickHealSpellID(healneed)
     if (AceLibrary and AceLibrary:HasInstance("ItemBonusLib-1.0")) then
         local itemBonus = AceLibrary("ItemBonusLib-1.0")
         Bonus = itemBonus:GetBonus("HEAL") or 0
-        debug(string.format("Equipment Healing Bonus: %d", Bonus))
+        QuickHeal_debug(string.format("Equipment Healing Bonus: %d", Bonus))
     end
 
     -- Spiritual Guidance - Increases spell damage and healing by up to 5% (per rank) of your total Spirit.
@@ -939,6 +939,7 @@ function QuickHeal_Command_Priest(msg)
 
     writeLine("/qh reset - Reset configuration to default parameters for all classes.");
 end
+
 
 
 
