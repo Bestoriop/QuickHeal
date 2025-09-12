@@ -651,7 +651,125 @@ function QuickHeal_Command_Paladin(msg)
     writeLine("/qh reset - Reset configuration to default parameters for all classes.");
 end
 
+ ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+-- extend by Drokin
+-- MELEE PALADIN HEALING functions.  Currently in beta. 
+-- The following functions give paladins that choose to heal in melee additional tools to automate Holy Strike and Holy Shock.
+-- /run qhHStrike(93,3);  -- Smart Holy Stike function, 1st number is the min %healing threshold to trigger, the 2nd number is the # of targets needed under threshold (DEFAULT set at 93% threshold on 3 targets)
+-- /run qhHShock(85); -- Smart Holy Shock function, number is the min % healing threshold to trigger (DEFAULT is set to 85%)
 
+-- Define CastHolyStrike as a global function
+function qhHStrike(HSminHP,HSminTargets)
+    -- Get the count of players meeting the conditions
+    local playersInRange = GetPlayersBelowHealthThresholdInRange(HSminHP);
+	
+	-- Cast Holy Strike if min # of targets conditions are met
+    if playersInRange >= HSminTargets then
+        CastSpellByName("Holy Strike");
+        -- Uncomment next line for debug messages
+        -- DEFAULT_CHAT_FRAME:AddMessage("Holy Strike cast! Players in range: " .. playersInRange); else DEFAULT_CHAT_FRAME:AddMessage("Conditions not met. Players in range: " .. playersInRange);
+    end
+end
 
+-- Define HealWithHolyShock as a global function
+function qhHShock(SHOCKminHP)
+    -- Find the lowest health unit and its health percentage
+    local target, healthPct = GetLowestHealthUnit();
 
+    -- Cast Holy Shock only if target exists and their health is below the threshold
+    if target and healthPct < SHOCKminHP then
+        CastSpellByName("Holy Shock", target);
+        -- Uncomment the next line if you want a chat message when Holy Shock is cast for debugging
+        -- DEFAULT_CHAT_FRAME:AddMessage("Holy Shock cast on: " .. UnitName(target) .. " (Health: " .. string.format("%.1f", healthPct) .. "%)");     else if target then DEFAULT_CHAT_FRAME:AddMessage("Target " .. UnitName(target) .. " has health above " .. SHOCKminHP .. "%. No Holy Shock cast."); else DEFAULT_CHAT_FRAME:AddMessage("No valid target found for Holy Shock."); end
+    end
+end
+
+-- Define IsHealable as a function
+function IsHealable(unit)
+    -- Returns true if the unit is valid, friendly, alive, and connected
+    return UnitExists(unit) and UnitIsFriend("player", unit) and not UnitIsDeadOrGhost(unit) and UnitIsConnected(unit);
+end
+
+-- Define IsWithin10Yards as a function for Holy Strike.  8yds check is currently used
+function IsWithin10Yards(unit)
+    -- Checks if a unit is within 10 yards using CheckInteractDistance
+    return CheckInteractDistance(unit, 3); -- 3 = 10 yards interraction distance
+end
+
+-- Define GetPlayersBelowHealthThresholdInRange as a function for Holy Strike
+function GetPlayersBelowHealthThresholdInRange(minHPf)
+    -- Returns the count of healable players within 10 yards with health at or below the specified threshold
+    local count = 0;
+    -- Check all raid members if in raid
+    if GetNumRaidMembers() > 0 then
+        for i = 1, GetNumRaidMembers() do
+            local unit = "raid" .. i;
+            if IsHealable(unit) and IsWithin10Yards(unit) then
+                local healthPercent = (UnitHealth(unit) / UnitHealthMax(unit)) * 100;
+				if healthPercent <= minHPf then
+                    count = count + 1;
+                end
+			end
+        end
+    else
+        -- Check player and party members if in a party or solo
+        local units = {"player"};
+        if GetNumPartyMembers() > 0 then
+            for i = 1, GetNumPartyMembers() do
+                table.insert(units, "party" .. i);
+            end
+        end
+
+        for _, unit in ipairs(units) do
+            if IsHealable(unit) and IsWithin10Yards(unit) then
+                local healthPercent = (UnitHealth(unit) / UnitHealthMax(unit)) * 100;
+                if healthPercent <= minHPf then
+                    count = count + 1;
+                end
+            end
+        end
+    end
+    return count;
+end
+
+-- Define GetLowestHealthUnit as a global function for Holy Shock
+function GetLowestHealthUnit()
+    -- Finds the unit with the lowest health percentage
+    local lowestUnit = nil;
+    local lowestHealthPct = 100;
+
+    -- Check all raid members if in raid
+    if GetNumRaidMembers() > 0 then
+        for i = 1, GetNumRaidMembers() do
+            local unit = "raid" .. i;
+            if IsHealable(unit) and CheckInteractDistance(unit, 4) then -- 4 = 20 yards
+                local healthPct = (UnitHealth(unit) / UnitHealthMax(unit)) * 100; -- Fixed missing parenthesis
+                if healthPct < lowestHealthPct then
+                    lowestUnit = unit;
+                    lowestHealthPct = healthPct;
+                end
+            end
+        end
+    else
+        -- Check player, party members, and pets if in a party or solo
+        local units = {"player"};
+        if GetNumPartyMembers() > 0 then
+            for i = 1, GetNumPartyMembers() do
+                table.insert(units, "party" .. i);
+            end
+        end
+
+        for _, unit in ipairs(units) do
+            if IsHealable(unit) and CheckInteractDistance(unit, 4) then
+                local healthPct = ((UnitHealth(unit)+HealComm:getHeal(UnitName(unit))) / UnitHealthMax(unit)) * 100;
+                if healthPct < lowestHealthPct then
+                    lowestUnit = unit;
+                    lowestHealthPct = healthPct;
+                end
+            end
+        end
+    end
+
+    return lowestUnit, lowestHealthPct; -- Return both unit and health percentage
+end

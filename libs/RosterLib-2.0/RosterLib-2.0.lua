@@ -239,88 +239,114 @@ function RosterLib:ProcessRoster()
 	end
 end
 
+function RosterLib:GetUnitByGUID(g)
+  if not g then return end
+  for _, u in pairs(self.roster) do
+    if u.guid == g then return u.unitid, u.name, u.class, u.subgroup, u.rank end
+  end
+end
 
 function RosterLib:CreateOrUpdateUnit(unitid)
-	local old = nil
-	-- check for name
-	local name = UnitName(unitid)
-	if name and name ~= UNKNOWNOBJECT and name ~= UKNOWNBEING and not UnitIsCharmed(unitid) then
-		-- clear stuff
-		unknownUnits[unitid] = nil
-		-- return if a pet attempts to replace a player name
-		-- this doesnt fix the problem with 2 pets overwriting each other FIXME
-		if string.find(unitid,"pet") then
-			if roster[name] and roster[name].class ~= "pet" then
-				return name
-			end
-		end
-		-- save old data if existing
-		if roster[name] then
-			old          = Compost and Compost:Acquire() or {}
-			old.name     = roster[name].name
-			old.unitid   = roster[name].unitid
-			old.class    = roster[name].class
-			old.rank     = roster[name].rank
-			old.subgroup = roster[name].subgroup
-			old.online   = roster[name].online
-		end
-		-- object
-		if not roster[name] then
-			roster[name] = Compost and Compost:Acquire() or {}
-		end
-		-- name
-		roster[name].name = name
-		-- unitid
-		roster[name].unitid = unitid
-		-- class
-		if string.find(unitid,"pet") then
-			roster[name].class = "PET"
-		else
-			_,roster[name].class = UnitClass(unitid)
-		end
-		-- subgroup and rank
-		if GetNumRaidMembers() > 0 then
-			local _,_,num = string.find(unitid, "(%d+)")
-			_,roster[name].rank,roster[name].subgroup = GetRaidRosterInfo(num)
-		else
-			roster[name].subgroup = 1
-			roster[name].rank = 0
-		end
-		-- online/offline status
-		roster[name].online = UnitIsConnected(unitid)
+  local old = nil
+  -- check for name
+  local name = UnitName(unitid)
+  if name and name ~= UNKNOWNOBJECT and name ~= UKNOWNBEING and not UnitIsCharmed(unitid) then
+    -- clear stuff
+    unknownUnits[unitid] = nil
+    -- return if a pet attempts to replace a player name
+    -- (original compared against "pet"; class is stored as "PET")
+    if string.find(unitid,"pet") then
+      if roster[name] and roster[name].class ~= "PET" then
+        return name
+      end
+    end
 
-		-- compare data
-		if not old
-		or roster[name].name     ~= old.name
-		or roster[name].unitid   ~= old.unitid
-		or roster[name].class    ~= old.class
-		or roster[name].subgroup ~= old.subgroup
-		or roster[name].rank     ~= old.rank
-		or roster[name].online   ~= old.online
-		then
-			updatedUnits[name]             = Compost and Compost:Acquire() or {}
-			updatedUnits[name].oldname     = (old and old.name) or nil
-			updatedUnits[name].oldunitid   = (old and old.unitid) or nil
-			updatedUnits[name].oldclass    = (old and old.class) or nil
-			updatedUnits[name].oldsubgroup = (old and old.subgroup) or nil
-			updatedUnits[name].oldrank     = (old and old.rank) or nil
-			updatedUnits[name].oldonline   = (old and old.online) or nil
-			updatedUnits[name].name        = roster[name].name
-			updatedUnits[name].unitid      = roster[name].unitid
-			updatedUnits[name].class       = roster[name].class
-			updatedUnits[name].subgroup    = roster[name].subgroup
-			updatedUnits[name].rank        = roster[name].rank
-			updatedUnits[name].online      = roster[name].online
-		end
-		-- compost our table
-		if old and Compost then
-			Compost:Reclaim(old)
-		end
-		return name
-	else
-		unknownUnits[unitid] = true
-		return false
-	end
+    -- clone old entry
+    if roster[name] then
+      old              = Compost and Compost:Acquire() or {}
+      old.name         = roster[name].name
+      old.unitid       = roster[name].unitid
+      old.class        = roster[name].class
+      old.rank         = roster[name].rank
+      old.subgroup     = roster[name].subgroup
+      old.online       = roster[name].online
+      old.guid         = roster[name].guid  -- NEW: keep old guid in diff
+    end
+
+    -- create entry if needed
+    if not roster[name] then
+      roster[name] = Compost and Compost:Acquire() or {}
+    end
+
+    -- name & unitid
+    roster[name].name   = name
+    roster[name].unitid = unitid
+
+    -- NEW: SuperWoW GUID (UnitExists returns exists,guid)
+    do
+      local _, guid = UnitExists(unitid)
+      if type(guid) == "string" and guid ~= "" then
+        roster[name].guid = guid
+      else
+        roster[name].guid = roster[name].guid or nil
+      end
+    end
+
+    -- class
+    if string.find(unitid,"pet") then
+      roster[name].class = "PET"
+    else
+      _, roster[name].class = UnitClass(unitid)
+    end
+
+    -- subgroup and rank
+    if GetNumRaidMembers() > 0 then
+      local _,_,num = string.find(unitid, "(%d+)")
+      _, roster[name].rank, roster[name].subgroup = GetRaidRosterInfo(num)
+    else
+      roster[name].subgroup = 1
+      roster[name].rank = 0
+    end
+
+    -- online/offline status
+    roster[name].online = UnitIsConnected(unitid)
+
+    -- compare data (include guid)
+    if not old
+    or roster[name].name     ~= old.name
+    or roster[name].unitid   ~= old.unitid
+    or roster[name].class    ~= old.class
+    or roster[name].subgroup ~= old.subgroup
+    or roster[name].rank     ~= old.rank
+    or roster[name].online   ~= old.online
+    or roster[name].guid     ~= old.guid then
+      updatedUnits[name]               = Compost and Compost:Acquire() or {}
+      updatedUnits[name].oldname       = (old and old.name) or nil
+      updatedUnits[name].oldunitid     = (old and old.unitid) or nil
+      updatedUnits[name].oldclass      = (old and old.class) or nil
+      updatedUnits[name].oldsubgroup   = (old and old.subgroup) or nil
+      updatedUnits[name].oldrank       = (old and old.rank) or nil
+      updatedUnits[name].oldonline     = (old and old.online) or nil
+      updatedUnits[name].oldguid       = (old and old.guid) or nil  -- NEW
+
+      updatedUnits[name].name          = roster[name].name
+      updatedUnits[name].unitid        = roster[name].unitid
+      updatedUnits[name].class         = roster[name].class
+      updatedUnits[name].subgroup      = roster[name].subgroup
+      updatedUnits[name].rank          = roster[name].rank
+      updatedUnits[name].online        = roster[name].online
+      updatedUnits[name].guid          = roster[name].guid           -- NEW
+    end
+
+    -- compost our table
+    if old and Compost then
+      Compost:Reclaim(old)
+    end
+    return name
+  else
+    unknownUnits[unitid] = true
+    return false
+  end
 end
 
 

@@ -6,10 +6,14 @@ QuickClick_OldOnClick = {};
 --[ Click event handlers ]--
 
 local function QuickClick(button,unit)
-    if IsQuickClickKeyDown() and button == MouseButton then 
-        QuickHeal(unit);
-        return true;
-    else return false end
+  if IsQuickClickKeyDown() and button == MouseButton then
+    if type(SetMouseoverUnit) == "function" and unit then SetMouseoverUnit(unit) end
+    QuickHeal(unit)
+    if type(SetMouseoverUnit) == "function" then SetMouseoverUnit() end
+    return true
+  else
+    return false
+  end
 end
 
 -- PlayerFrame

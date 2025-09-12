@@ -21,7 +21,9 @@ local roster = AceLibrary("RosterLib-2.0")
 local itemBonus = AceLibrary("ItemBonusLib-1.0")
 local L = AceLibrary("AceLocale-2.2"):new("HealComm-1.0")
 local HealComm = {}
-local has_superwow = SetAutoloot and true or false
+local has_superwow  = (type(SUPERWOW_VERSION) == "string")
+local has_nampower  = (type(GetNampowerVersion) == "function")
+
 local player_guid
 ------------------------------------------------
 -- Locales
@@ -403,6 +405,9 @@ local function external(self, major, instance)
 		else
 			self:RegisterEvent("SPELLCAST_START")
 			self:RegisterEvent("SPELLCAST_STOP")
+		end
+		if has_nampower then
+			self:RegisterEvent("SPELL_CAST_EVENT")
 		end
 		self:RegisterEvent("SPELLCAST_INTERRUPTED")
 		self:RegisterEvent("SPELLCAST_FAILED")
@@ -1223,6 +1228,16 @@ function HealComm:GetUnitSpellPower(unit, spell)
 	end
 	return targetpower, targetmod
 end			
+
+function HealComm:SPELL_CAST_EVENT(success, spellId, castType, targetGuid, itemId)
+  -- If a cast actually fired (success == 1), finish like a normal cast stop.
+  -- If it failed, go through your fail path so bars clear correctly.
+  if success == 1 then
+    self:SPELLCAST_STOP()
+  else
+    self:SPELLCAST_FAILED()
+  end
+end
 
 function HealComm:UNIT_CASTEVENT(caster,target,action,spell_id,cast_time)
 	if caster ~= player_guid then return end

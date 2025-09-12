@@ -4,6 +4,7 @@
     <Script file="localization.de.lua"/>
     <Script file="localization.fr.lua"/>
     <Script file="Graveyard.lua"/>
+    <Script file="SWNPCompat.lua"/>
     <Script file="QuickHeal.lua"/>
     <Script file="QuickClick.lua"/>
     <Script file="QuickHealDruid.lua"/>
