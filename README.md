@@ -1,12 +1,10 @@
-# QuickHeal
+# QuickHeal Turtle Wow
 
 QuickHeal automates healing spell selection and targeting for healers. It finds the lowest health party or raid member, picks the best spell rank for the deficit and your mana, and casts it — no manual targeting required. Works with Priest, Druid, Paladin, and Shaman.
 
-There is 2 different versions for Turtle/Kronos.
-
 ## Installation
 
-Download QuickHeal into your `Interface/AddOns` folder. Ensure the folder is named `QuickHeal` (remove any `-turtle or -kronos` suffix).
+Download QuickHeal into your `Interface/AddOns` folder. Ensure the folder is named `QuickHeal` (remove any `-turtle suffix).
 
 ## General Commands
 
