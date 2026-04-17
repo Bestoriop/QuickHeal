@@ -83,7 +83,7 @@ In a party (not raid), `/qh poh` targets yourself since Prayer of Healing heals 
 
 ### Recommended Macros
 
-```
+
 /qh
 ```
 Basic heal — selects optimal direct heal spell and rank.
@@ -94,9 +94,6 @@ Basic heal — selects optimal direct heal spell and rank.
 Cast Renew on the lowest health target without an active HoT.
 
 ```
-
-
----
 
 ## Druid
 
