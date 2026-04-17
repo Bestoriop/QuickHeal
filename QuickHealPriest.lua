@@ -253,8 +253,8 @@ function QuickHeal_Priest_FindHealSpellToUse(target, healType, multiplier, force
             if (healneed > (286 + healMod15) * k * shMod or 2 <= minRankFH) and ManaLeft >= 155 and maxRankFH >= 2 then
                 SpellID = SpellIDsFH[2]; HealSize = (286 + healMod15) * shMod
             end
-            if (healneed > (319 + healMod15) * k * shMod or 3 <= minRankFH) and ManaLeft >= 185 and maxRankFH >= 3 then
-                SpellID = SpellIDsFH[3]; HealSize = (319 + healMod15) * shMod
+            if (healneed > (360 + healMod15) * k * shMod or 3 <= minRankFH) and ManaLeft >= 185 and maxRankFH >= 3 then
+                SpellID = SpellIDsFH[3]; HealSize = (360 + healMod15) * shMod
             end
             if (healneed > (439 + healMod15) * k * shMod or 4 <= minRankFH) and ManaLeft >= 215 and maxRankFH >= 4 then
                 SpellID = SpellIDsFH[4]; HealSize = (439 + healMod15) * shMod
