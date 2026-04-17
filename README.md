@@ -95,6 +95,8 @@ Cast Renew on the lowest health target without an active HoT.
 
 ```
 
+---
+
 ## Druid
 
 **Spells used**: Healing Touch, Regrowth, Rejuvenation
