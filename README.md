@@ -71,15 +71,6 @@ Toggle with `/qh toggle`.
 | `/qh hot fh` | Firehose — spam max rank Renew ignoring HP check |
 | `/qh [mask] book` | Book of Prayer with a target mask (e.g. `/qh mt book`) |
 
-### Book of Prayer
-
-The `/qh book` command alternates between Greater Heal and Flash Heal to trigger the Book of Prayer talent, which refunds 15%/30% of a healing spell's mana cost when it differs from the previous healing spell. Rank selection still follows your downrank and minrank settings.
-
-### Prayer of Healing
-
-The `/qh poh` command scores each raid subgroup by total health deficit (the sum of missing HP across all members in the group). The group with the highest combined deficit is selected, and Prayer of Healing is cast on a member of that group. This prefers groups with multiple injured members over groups with a single heavily damaged player.
-
-In a party (not raid), `/qh poh` targets yourself since Prayer of Healing heals the target's party within 36 yards.
 
 ### Recommended Macros
 
