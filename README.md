@@ -59,34 +59,17 @@ Toggle with `/qh toggle`.
 
 **Spells used**: Lesser Heal, Heal, Greater Heal, Flash Heal, Renew
 
-### Commands
+### Recommended Macros
 
 | Command | Description |
 |---------|-------------|
 | `/qh` | Optimal direct heal on lowest health target |
-| `/qh heal max` | Max rank Flash Heal |
 | `/qh gh` | Force GH heal usage for T2 8b bonus |
 | `/qh hot` | Renew on lowest health target without an active HoT |
+| `/qh heal max` | Max rank Flash Heal |
 | `/qh hot max` | Max rank Renew |
 | `/qh hot fh` | Firehose — spam max rank Renew ignoring HP check |
 | `/qh [mask] book` | Book of Prayer with a target mask (e.g. `/qh mt book`) |
-
-
-### Recommended Macros
-
-
-/qh
-```
-Basic heal — selects optimal direct heal spell and rank.
-```
-/qh hot
-```
-Cast Renew on the lowest health target without an active HoT.
-```
-/qh gh
-```
-Greater Heal only — It will only use GH for maximum T2 8p bonus benefit
-```
 
 ---
 
@@ -94,7 +77,7 @@ Greater Heal only — It will only use GH for maximum T2 8p bonus benefit
 
 **Spells used**: Healing Touch, Regrowth, Rejuvenation
 
-### Commands
+### Recommanded Macros
 
 | Command | Description |
 |---------|-------------|
@@ -107,17 +90,7 @@ Greater Heal only — It will only use GH for maximum T2 8p bonus benefit
 | `/qh [mask] ht` | Force Healing Touch with a target mask |
 | `/qh [mask] rg` | Force Regrowth with a target mask |
 
-### Recommended Macros
-
-```
-/qh
-```
-Basic heal — selects Healing Touch or Regrowth based on the healthy threshold.
-
-```
-/qh hot
-```
-Cast Rejuvenation on the lowest health target without an active HoT.
+### Other useful Macros
 
 ```
 /script QuickHeal(nil,'Swiftmend')
