@@ -57,7 +57,7 @@ Toggle with `/qh toggle`.
 
 ## Priest
 
-**Spells used**: Lesser Heal, Heal, Greater Heal, Flash Heal, Renew, Prayer of Healing
+**Spells used**: Lesser Heal, Heal, Greater Heal, Flash Heal, Renew
 
 ### Commands
 
