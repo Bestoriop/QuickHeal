@@ -687,84 +687,84 @@ HealComm.Spells = {
 	};
 	[L["Lesser Heal"]] = {
 		[1] = function (SpellPower)
-			return hc_lesser_heal(SpellPower, 53, 1.5/3.5, 0.19)
+			return hc_lesser_heal(SpellPower, 51, 1.5/3.5, 0.19)
 		end;
 		[2] = function (SpellPower)
-			return hc_lesser_heal(SpellPower, 84, 2/3.5, 0.34)
+			return hc_lesser_heal(SpellPower, 78, 2/3.5, 0.34)
 		end;
 		[3] = function (SpellPower)
-			return hc_lesser_heal(SpellPower, 154, 2.5/3.5, 0.6)
+			return hc_lesser_heal(SpellPower, 146, 2.5/3.5, 0.6)
 		end;
 	};
 	[L["Heal"]] = {
 		[1] = function (SpellPower)
-			return hc_heal(SpellPower, 330, 0.586)
+			return hc_heal(SpellPower, 318, 0.586)
 		end;
 		[2] = function (SpellPower)
-			return hc_heal(SpellPower, 476, 1)
+			return hc_heal(SpellPower, 460, 1)
 		end;
 		[3] = function (SpellPower)
-			return hc_heal(SpellPower, 624, 1)
+			return hc_heal(SpellPower, 606, 1)
 		end;
 		[4] = function (SpellPower)
-			return hc_heal(SpellPower, 667, 1)
+			return hc_heal(SpellPower, 758, 1)
 		end;
 	};
 	[L["Flash Heal"]] = {
 		[1] = function (SpellPower)
-			return hc_flash_heal(SpellPower, 225)
+			return hc_flash_heal(SpellPower, 215)
 		end;
 		[2] = function (SpellPower)
-			return hc_flash_heal(SpellPower, 297)
+			return hc_flash_heal(SpellPower, 286)
 		end;
 		[3] = function (SpellPower)
-			return hc_flash_heal(SpellPower, 319)
+			return hc_flash_heal(SpellPower, 360)
 		end;
 		[4] = function (SpellPower)
-			return hc_flash_heal(SpellPower, 387)
+			return hc_flash_heal(SpellPower, 439)
 		end;
 		[5] = function (SpellPower)
-			return hc_flash_heal(SpellPower, 498)
+			return hc_flash_heal(SpellPower, 567)
 		end;
 		[6] = function (SpellPower)
-			return hc_flash_heal(SpellPower, 618)
+			return hc_flash_heal(SpellPower, 704)
 		end;
 		[7] = function (SpellPower)
-			return hc_flash_heal(SpellPower, 769)
+			return hc_flash_heal(SpellPower, 888)
 		end;
 	};
 	[L["Greater Heal"]] = {
 		[1] = function (SpellPower)
-			return hc_greater_heal(SpellPower, 838)
+			return hc_greater_heal(SpellPower, 956)
 		end;
 		[2] = function (SpellPower)
-			return hc_greater_heal(SpellPower, 1066)
+			return hc_greater_heal(SpellPower, 1219)
 		end;
 		[3] = function (SpellPower)
-			return hc_greater_heal(SpellPower, 1328)
+			return hc_greater_heal(SpellPower, 1523)
 		end;
 		[4] = function (SpellPower)
-			return hc_greater_heal(SpellPower, 1632)
+			return hc_greater_heal(SpellPower, 1902)
 		end;
 		[5] = function (SpellPower)
-			return hc_greater_heal(SpellPower, 1768)
+			return hc_greater_heal(SpellPower, 2080)
 		end;
 	};
 	[L["Prayer of Healing"]] = {
 		[1] = function (SpellPower)
-			return hc_prayer_of_healing(SpellPower, 323)
+			return hc_prayer_of_healing(SpellPower, 311)
 		end;
 		[2] = function (SpellPower)
-			return hc_prayer_of_healing(SpellPower, 405)
+			return hc_prayer_of_healing(SpellPower, 458)
 		end;
 		[3] = function (SpellPower)
-			return hc_prayer_of_healing(SpellPower, 593)
+			return hc_prayer_of_healing(SpellPower, 676)
 		end;
 		[4] = function (SpellPower)
-			return hc_prayer_of_healing(SpellPower, 820)
+			return hc_prayer_of_healing(SpellPower, 965)
 		end;
 		[5] = function (SpellPower)
-			return hc_prayer_of_healing(SpellPower, 910)
+			return hc_prayer_of_healing(SpellPower, 1069)
 		end;
 	};
 	[L["Healing Touch"]] = {
