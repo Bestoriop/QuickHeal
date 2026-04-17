@@ -94,14 +94,7 @@ Basic heal — selects optimal direct heal spell and rank.
 Cast Renew on the lowest health target without an active HoT.
 
 ```
-/qh book
-```
-Alternating GH/FH heal for Book of Prayer mana refund.
 
-```
-/qh poh
-```
-Prayer of Healing on the most injured raid group.
 
 ---
 
