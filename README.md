@@ -64,11 +64,11 @@ Toggle with `/qh toggle`.
 | Command | Description |
 |---------|-------------|
 | `/qh` | Optimal direct heal on lowest health target |
+| `/qh heal max` | Max rank Flash Heal |
+| `/qh gh` | Force GH heal usage for T2 8b bonus |
 | `/qh hot` | Renew on lowest health target without an active HoT |
 | `/qh hot max` | Max rank Renew |
 | `/qh hot fh` | Firehose — spam max rank Renew ignoring HP check |
-| `/qh book` | Book of Prayer heal — alternates Greater Heal and Flash Heal |
-| `/qh poh` | Prayer of Healing on the raid group with highest total deficit |
 | `/qh [mask] book` | Book of Prayer with a target mask (e.g. `/qh mt book`) |
 
 ### Book of Prayer
@@ -87,12 +87,14 @@ In a party (not raid), `/qh poh` targets yourself since Prayer of Healing heals 
 /qh
 ```
 Basic heal — selects optimal direct heal spell and rank.
-
 ```
 /qh hot
 ```
 Cast Renew on the lowest health target without an active HoT.
-
+```
+/qh gh
+```
+Greater Heal only — It will only use GH for maximum T2 8p bonus benefit
 ```
 
 ---
