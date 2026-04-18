@@ -244,7 +244,7 @@ function QuickHeal_Priest_FindHealSpellToUse(target, healType, multiplier, force
         end
 
     -- =========================
-    -- FLASH HEAL 
+    -- FLASH HEAL (when target is low) 
     -- =========================
     elseif not forceMaxHPS then
         if Health < QuickHealVariables.RatioFull or QHV.TestMode or (QHV.PrecastAggro and QuickHeal_UnitHasAggro(target)) then
@@ -271,7 +271,7 @@ function QuickHeal_Priest_FindHealSpellToUse(target, healType, multiplier, force
         end
 
     -- =========================
-    -- MAX RANK FLASH HEAL (without checking heal need)
+    -- MAX RANK FLASH HEAL 
     -- =========================
     else
         if ManaLeft >= 125 and maxRankFH >= 1 then
