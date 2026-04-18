@@ -199,7 +199,7 @@ function QuickHeal_Priest_FindHealSpellToUse(target, healType, multiplier, force
         end
 
     -- =========================
-    -- NORMAL HEAL (efficient)
+    -- NORMAL HEAL (LESSER OR HEAL OR GREATER)
     -- =========================
     elseif (not forceMaxHPS) and (TargetIsHealthy or maxRankFH < 1) then
         if Health < QuickHealVariables.RatioFull or QHV.TestMode or (QHV.PrecastAggro and QuickHeal_UnitHasAggro(target)) then
@@ -244,7 +244,7 @@ function QuickHeal_Priest_FindHealSpellToUse(target, healType, multiplier, force
         end
 
     -- =========================
-    -- FLASH HEAL (panic)
+    -- FLASH HEAL 
     -- =========================
     elseif not forceMaxHPS then
         if Health < QuickHealVariables.RatioFull or QHV.TestMode or (QHV.PrecastAggro and QuickHeal_UnitHasAggro(target)) then
@@ -271,7 +271,7 @@ function QuickHeal_Priest_FindHealSpellToUse(target, healType, multiplier, force
         end
 
     -- =========================
-    -- MAX HPS (FH spam)
+    -- MAX RANK FLASH HEAL (without checking heal need)
     -- =========================
     else
         if ManaLeft >= 125 and maxRankFH >= 1 then
@@ -452,7 +452,7 @@ function QuickHeal_Command_Priest(msg)
                 QuickHeal(arg1, nil, nil, true)
                 return
             end
-            if arg2 == "hot" and arg3 == "fh" then
+            if arg2 == "hot" and arg3 == "spam" then
                 QuickHOT(arg1, nil, nil, true, true)
                 return
             end
@@ -502,7 +502,7 @@ function QuickHeal_Command_Priest(msg)
             QuickHOT(nil, nil, nil, true, false)
             return
         end
-        if arg4 == "hot" and arg5 == "fh" then
+        if arg4 == "hot" and arg5 == "spam" then
             QuickHOT(nil, nil, nil, true, true)
             return
         end
@@ -594,5 +594,5 @@ function QuickHeal_Command_Priest(msg)
     writeLine("/qh [mask] [type] [mod] - Standard healing.")
     writeLine(" [mask]: player | target | targettarget | party | mt | nonmt | subgroup")
     writeLine(" [type]: heal - Normal cast | gh - force GH | hot - renew")
-    writeLine(" [mod]: max - Force max flash heal or renew | fh - spam the max renew on everyone ")
+    writeLine(" [mod]: max - Force max flash heal or renew | spam - spam the max renew on everyone ")
 end
