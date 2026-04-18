@@ -42,8 +42,8 @@ Examples: `/qh mt` heals only tanks. `/qh party hot` casts a HoT on a party memb
 | `heal` | Direct heal (default) |
 | `hot` | HoT spell (Renew, Rejuvenation) |
 | `heal max` | Direct heal at max rank |
-| `hot max` | HoT at max rank |
-| `hot fh` | Firehose — max rank HoT ignoring HP check |
+| `hot max` | Hot Max rank |
+| `hot spam` | HoT Max Rank Spam ignoring HP check |
 
 ### HPS Modes
 
@@ -66,9 +66,9 @@ Toggle with `/qh toggle`.
 | `/qh` | Optimal direct heal on lowest health target |
 | `/qh gh` | Force GH heal usage for T2 8b bonus |
 | `/qh hot` | Renew on lowest health target without an active HoT |
-| `/qh heal max` | Max rank Flash Heal |
-| `/qh hot max` | Max rank Renew |
-| `/qh hot fh` | Firehose — spam max rank Renew ignoring HP check |
+| `/qh heal max` | Flash Heal Max rank |
+| `/qh hot max` | Renew Max rank  |
+| `/qh hot spam` | Renew Max rank Spam ignoring HP check |
 | `/qh [mask] book` | Book of Prayer with a target mask (e.g. `/qh mt book`) |
 
 ---
@@ -85,8 +85,8 @@ Toggle with `/qh toggle`.
 | `/qh ht` | Force Healing Touch |
 | `/qh rg` | Force Regrowth |
 | `/qh hot` | Rejuvenation on lowest health target without an active HoT |
-| `/qh hot max` | Max rank Rejuvenation |
-| `/qh hot fh` | Firehose — spam max rank Rejuvenation |
+| `/qh hot max` | Rejuvenation Max rank on lowest health target without an active HoT |
+| `/qh hot spam` | Rejuvenation Max rank Spam ignoring hp check |
 | `/qh [mask] ht` | Force Healing Touch with a target mask |
 | `/qh [mask] rg` | Force Regrowth with a target mask |
 
