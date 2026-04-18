@@ -5,7 +5,7 @@
     <Binding name="QUICKHEAL_HOT">
         if QUICKHEAL_LOADED then QuickHOT(nil, nil, nil, true, false) end
     </Binding>
-    <Binding name="QUICKHEAL_HOTFH">
+    <Binding name="QUICKHEAL_HOTSPAM">
         if QUICKHEAL_LOADED then QuickHOT(nil, nil, nil, true, true) end
     </Binding>
     <Binding name="QUICKHEAL_HEALSUBGROUP">
