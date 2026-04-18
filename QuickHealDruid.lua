@@ -1,4 +1,4 @@
--- QuickHeal Druid Module (Refactored)
+-- QuickHeal Druid Module (Refactored) 
 -- Consolidated spell selection with shared helper functions
 
 local function writeLine(s, r, g, b)
@@ -467,7 +467,7 @@ function QuickHeal_Command_Druid(msg)
                 QuickHeal(arg1, nil, nil, true)
                 return
             end
-            if arg2 == "hot" and arg3 == "fh" then
+            if arg2 == "hot" and arg3 == "spam" then
                 QuickHOT(arg1, nil, nil, true, true)
                 return
             end
@@ -510,7 +510,7 @@ function QuickHeal_Command_Druid(msg)
             QuickHOT(nil, nil, nil, true, false)
             return
         end
-        if arg4 == "hot" and arg5 == "fh" then
+        if arg4 == "hot" and arg5 == "spam" then
             QuickHOT(nil, nil, nil, true, true)
             return
         end
@@ -602,5 +602,5 @@ function QuickHeal_Command_Druid(msg)
     writeLine("/qh [mask] [type] [mod] - Heals the party/raid member that most needs it.")
     writeLine(" [mask]: player, target, targettarget, party, mt, nonmt, subgroup")
     writeLine(" [type]: heal (auto), ht (force Healing Touch), rg (force Regrowth), hot (Rejuvenation)")
-    writeLine(" [mod]: max (max rank), fh (firehose - max rank, no hp check)")
+    writeLine(" [mod]: max (max rank), spam (spam hot max rank, no hp check)")
 end
