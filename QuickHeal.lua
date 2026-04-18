@@ -75,8 +75,7 @@ local DQHV = { -- Default values
     PreHOTAggroPreference = "HIGHEST_MAX_HEALTH",  -- Preference for pre-HOT aggro target selection: HIGHEST_MAX_HEALTH or LOWEST_MAX_HEALTH
 }
 
--- Runtime state for Book of Prayer (not saved)
-QH_BookLastSpell = nil  -- "gh" or "fh", tracks last heal type for alternation
+
 
 local has_pepo_nam = pcall(GetCVar, "NP_QueueCastTimeSpells")
 
@@ -324,7 +323,7 @@ PlayerClass = PlayerClass and string.lower(PlayerClass) or "unknown";
 BINDING_HEADER_QUICKHEAL = "QuickHeal";
 BINDING_NAME_QUICKHEAL_HEAL = "Heal";
 BINDING_NAME_QUICKHEAL_HOT = "HoT";
-BINDING_NAME_QUICKHEAL_HOTFH = "HoT Firehose (Naxx Gargoyles)";
+BINDING_NAME_QUICKHEAL_HOTSPAM = "HoT Spam (Naxx Gargoyles)";
 BINDING_NAME_QUICKHEAL_HEALSUBGROUP = "Heal Subgroup";
 BINDING_NAME_QUICKHEAL_HOTSUBGROUP = "HoT Subgroup";
 BINDING_NAME_QUICKHEAL_HEALPARTY = "Heal Party";
