@@ -41,7 +41,7 @@ local function GetPriestModifiers()
     mods.bonus = QuickHeal_GetEquipmentBonus()
 
     -- Spiritual Guidance - 5% of Spirit per rank
-    local sgRank = QuickHeal_GetTalentRank(2, 12)
+    local sgRank = QuickHeal_GetTalentRank(2, 14)
     local _, spirit = UnitStat('player', 5)
     mods.sgMod = (spirit or 0) * 5 * sgRank / 100
 
@@ -58,12 +58,12 @@ local function GetPriestModifiers()
     mods.hotMod15 = (1.5 / 3.5) * totalBonus
     mods.hotMod30 = (3.0 / 3.5) * totalBonus
 
-    -- Spiritual Healing - 6% per rank
+    -- Spiritual Healing - 2% per rank
     local shRank = QuickHeal_GetTalentRank(2, 15)
-    mods.shMod = 1 + 6 * shRank / 100
+    mods.shMod = 1 + 2 * shRank / 100
 
     -- Improved Healing - reduces mana by 5% per rank
-    local ihRank = QuickHeal_GetTalentRank(2, 11)
+    local ihRank = QuickHeal_GetTalentRank(2, 10)
     mods.ihMod = 1 - 5 * ihRank / 100
 
     return mods
