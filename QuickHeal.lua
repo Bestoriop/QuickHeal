@@ -1257,9 +1257,9 @@ local function Initialise()
         QuickHealMinrank_Slider_FH:SetValue(QuickHealVariables.MinrankValueFH);
 
         QuickHealDownrank_Label_NH:SetText("Lesser Heal 1-3, Heal 4-7, Greater Heal 8-12");
-        QuickHealDownrank_Label_FH:SetText("Flash Heal");
+        QuickHealDownrank_Label_FH:SetText("Flash Heal 1-7");
         QuickHealMinrank_Label_NH:SetText("Lesser Heal 1-3, Heal 4-7, Greater Heal 8-12");
-        QuickHealMinrank_Label_FH:SetText("Flash Heal");
+        QuickHealMinrank_Label_FH:SetText("Flash Heal 1-7");
 
         -- Hide Chain Heal sliders (Shaman only)
         if QuickHealDownrank_Slider_CH then
