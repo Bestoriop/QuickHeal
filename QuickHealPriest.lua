@@ -582,17 +582,45 @@ function QuickHeal_Command_Priest(msg)
     -- =========================
     -- Help
     -- =========================
-    writeLine("== QUICKHEAL USAGE : PRIEST ==")
-    writeLine("/qh cfg - Opens up the configuration panel.")
-    writeLine("/qh test on|off - Toggles test mode.")
-    writeLine("/qh debug on|off - Toggles debug output.")
-    writeLine("/qh dll - Report DLL enhancement status.")
-    writeLine("/qh toggle - Switches between High HPS and Normal HPS.")
-    writeLine("/qh downrank | dr | minrank | ranks - Limit usable ranks.")
-    writeLine("/qh tanklist | tl - Toggle main tank list UI.")
-    writeLine("/qh reset - Reset configuration.")
-    writeLine("/qh [mask] [type] [mod] - Standard healing.")
-    writeLine(" [mask]: player | target | targettarget | party | mt | nonmt | subgroup")
-    writeLine(" [type]: heal - Normal cast | gh - force GH | hot - renew")
-    writeLine(" [mod]: max - Force max flash heal or renew | spam - spam the max renew on everyone ")
+    writeLine("== QUICKHEAL PRIEST ==")
+    
+    -- Core usage
+    writeLine(" ")
+    writeLine("Basic usage:")
+    writeLine("/qh [target] [type] [mode]")
+    
+    writeLine("Targets:")
+    writeLine(" player | target | targettarget | party | mt | nonmt | subgroup")
+    
+    writeLine("Types:")
+    writeLine(" heal  - Smart heal (uses slider logic)")
+    writeLine(" gh    - Force Greater Heal")
+    writeLine(" hot   - Renew")
+    
+    writeLine("Modes:")
+    writeLine(" max   - Use highest rank (FH / Renew)")
+    writeLine(" spam  - Ignore HP, spam max Renew")
+    
+    -- Examples
+    writeLine(" ")
+    writeLine("Examples:")
+    writeLine("/qh                 - Smart heal depending on slider")
+    writeLine("/qh heal max        - Max rank Flash Heal")
+    writeLine("/qh hot spam        - Spam max Renew")
+    
+    -- Settings
+    writeLine(" ")
+    writeLine("Settings:")
+    writeLine("/qh cfg             - Open config")
+    writeLine("/qh toggle          - Switch HPS mode (slider)")
+    writeLine("/qh downrank | dr   - Limit usable ranks")
+    writeLine("/qh tanklist | tl   - Toggle tank list")
+    writeLine("/qh reset           - Reset settings")
+    
+    -- Debug
+    writeLine(" ")
+    writeLine("Other:")
+    writeLine("/qh test on|off     - Test mode")
+    writeLine("/qh debug on|off    - Debug mode")
+    writeLine("/qh dll             - DLL status")
 end
