@@ -454,7 +454,7 @@ function strmatch(str, pat, init)
 end
 
 local function hc_paladin_mods()
-	local _,_,_,_,talentRank,_ = GetTalentInfo(1,6)
+	local _,_,_,_,talentRank,_ = GetTalentInfo(1,5)
 	return 4*talentRank/100 + 1
 end
 
@@ -469,9 +469,9 @@ local function hc_flash_of_light(SpellPower, SpellAmount)
 		local _,_,itemstring = string.find(GetInventoryItemLink("player",GetInventorySlotInfo("RangedSlot")), "|H(.+)|h")
 		local name = GetItemInfo(itemstring)
 		if name == 	L["Libram of Divinity"] then
-			lp = 28
+			lp = 53
 		elseif name == L["Libram of Light"] then
-			lp = 41
+			lp = 83
 		end
 	end
 	local hlMod = hc_paladin_mods()
@@ -479,19 +479,19 @@ local function hc_flash_of_light(SpellPower, SpellAmount)
 end
 
 local function hc_shaman_mods()
-	-- Tidal Mastery
-	local _,_,_,_,talentRank,_ = GetTalentInfo(3,5)
-	return 0.5*talentRank/100 + 1
+	-- Purification
+	local _,_,_,_,talentRank,_ = GetTalentInfo(3,14)
+	return 2*talentRank/100 + 1
 end
 
 local function hc_healing_wave(SpellPower, SpellAmount, Scaling1, Scaling2)
 	local pMod = hc_shaman_mods()
-	return (SpellAmount*pMod+(((Scaling1) * SpellPower)*Scaling2))
+	return (SpellAmount*pMod)+(((Scaling1) * SpellPower)*Scaling2)
 end
 
 local function hc_healing_wave2(SpellPower, SpellAmount)
 	local pMod = hc_shaman_mods()
-	return (SpellAmount+((3/3.5) * SpellPower)*pMod)
+	return (SpellAmount*pMod)+((3/3.5) * SpellPower)
 end
 
 local function hc_lesser_healing_wave(SpellPower, SpellAmount)
@@ -500,72 +500,72 @@ local function hc_lesser_healing_wave(SpellPower, SpellAmount)
 		local _,_,itemstring = string.find(GetInventoryItemLink("player",GetInventorySlotInfo("RangedSlot")), "|H(.+)|h")
 		local name = GetItemInfo(itemstring)
 		if name == L["Totem of Sustaining"] then
-			tp = 28
+			tp = 53
 		elseif name == L["Totem of Life"] then
-			tp = 40
+			tp = 80
 		end
 	end
 	local pMod = hc_shaman_mods()
-	return (SpellAmount+tp+((1.5/3.5) * SpellPower)*pMod)
+	return (SpellAmount*pMod)+tp+((1.5/3.5) * SpellPower)
 end
 
 local function hc_chain_heal(SpellPower, SpellAmount)
 	local pMod = hc_shaman_mods()
-	return (SpellAmount+((2.5/3.5) * SpellPower)*pMod)
+	return (SpellAmount*pMod)+((2.5/3.5) * SpellPower)
 end
 
 local function hc_priest_mods()
-	local _,_,_,_,talentRank,_ = GetTalentInfo(2,12)
+	local _,_,_,_,talentRank,_ = GetTalentInfo(2,14)
 	local _,Spirit,_,_ = UnitStat("player",5)
 	local sgMod = Spirit * 5*talentRank/100
 	local _,_,_,_,talentRank2,_ = GetTalentInfo(2,15)
-	local shMod = 6*talentRank2/100 + 1
+	local shMod = 2*talentRank2/100 + 1
 	return sgMod, shMod
 end
 
 local function hc_lesser_heal(SpellPower, SpellAmount, Scaling1, Scaling2)
 	local sgMod, shMod = hc_priest_mods()
-	return (SpellAmount+((Scaling1) * (SpellPower+sgMod))*Scaling2)*shMod
+	return ((SpellAmount*shMod)+((Scaling1) * (SpellPower+sgMod))*Scaling2)
 end
 
 local function hc_heal(SpellPower, SpellAmount, Scaling)
 	local sgMod, shMod = hc_priest_mods()
-	return (SpellAmount+((3/3.5) * (SpellPower+sgMod))*Scaling)*shMod
+	return ((SpellAmount*shMod)+((3/3.5) * (SpellPower+sgMod))*Scaling)
 end
 
 local function hc_flash_heal(SpellPower, SpellAmount)
 	local sgMod, shMod = hc_priest_mods()
-	return (SpellAmount+((1.5/3.5) * (SpellPower+sgMod)))*shMod
+	return (SpellAmount*shMod)+((1.5/3.5) * (SpellPower+sgMod))
 end
 
 local function hc_greater_heal(SpellPower, SpellAmount)
 	local sgMod, shMod = hc_priest_mods()
-	return (SpellAmount+((3/3.5) * (SpellPower+sgMod)))*shMod
+	return (SpellAmount*shMod)+((3/3.5) * (SpellPower+sgMod))
 end
 
 local function hc_prayer_of_healing(SpellPower, SpellAmount)
 	local sgMod, shMod = hc_priest_mods()
-	return (SpellAmount+((3/3.5/3) * (SpellPower+sgMod)))*shMod
+	return (SpellAmount*shMod)+((3/3.5/3) * (SpellPower+sgMod))
 end
 
 local function hc_druid_mods()
-	local _,_,_,_,talentRank,_ = GetTalentInfo(3,9)
+	local _,_,_,_,talentRank,_ = GetTalentInfo(3,12)
 	return 2*talentRank/100 + 1
 end
 
 local function hc_healing_touch(SpellPower, SpellAmount, Scaling1, Scaling2)
 	local gnMod = hc_druid_mods()
-	return (SpellAmount+((Scaling1) * SpellPower * (Scaling2))*gnMod)
+	return (SpellAmount*gnMod)+((Scaling1) * SpellPower * (Scaling2))
 end
 
 local function hc_healing_touch2(SpellPower, SpellAmount)
 	local gnMod = hc_druid_mods()
-	return ((SpellAmount+SpellPower)*gnMod)
+	return ((SpellAmount*gnMod)+SpellPower)
 end
 
 local function hc_regrowth(SpellPower, SpellAmount, Scaling)
 	local gnMod = hc_druid_mods()
-	return ((SpellAmount+(((2/3.5)*SpellPower)*0.5*Scaling))*gnMod)
+	return ((SpellAmount*gnMod)+(((2/3.5)*SpellPower)*0.5*Scaling))
 end
 
 
@@ -617,9 +617,6 @@ HealComm.Spells = {
 		end;
 		[6] = function (SpellPower)
 			return hc_flash_of_light(SpellPower, 364)
-		end;
-		[7] = function (SpellPower)
-			return hc_flash_of_light(SpellPower, 481)
 		end;
 	};
 	[L["Healing Wave"]] = {
@@ -778,7 +775,7 @@ HealComm.Spells = {
 			return hc_healing_touch(SpellPower, 220, 2.5/3.5, 1)
 		end;
 		[4] = function (SpellPower)
-			return hc_healing_touch(SpellPower, 435, 3/3.5, 1)
+			return hc_healing_touch(SpellPower, 405, 3/3.5, 1)
 		end;
 		[5] = function (SpellPower)
 			return hc_healing_touch2(SpellPower, 634)
