@@ -589,18 +589,54 @@ function QuickHeal_Command_Druid(msg)
     end
 
     -- Print usage
-    writeLine("== QUICKHEAL USAGE : DRUID ==")
-    writeLine("/qh cfg - Opens up the configuration panel.")
-    writeLine("/qh test on|off - Toggles test mode (ignores health thresholds).")
-    writeLine("/qh debug on|off - Toggles debug output.")
-    writeLine("/qh dll - Report DLL enhancement status.")
-    writeLine("/qh toggle - Switches between High HPS and Normal HPS.")
-    writeLine(
-        "/qh downrank | dr | minrank | ranks - Opens the slider to limit QuickHeal to constrain healing to lower ranks.")
-    writeLine("/qh tanklist | tl - Toggles display of the main tank list UI.")
-    writeLine("/qh reset - Reset configuration to default parameters.")
-    writeLine("/qh [mask] [type] [mod] - Heals the party/raid member that most needs it.")
-    writeLine(" [mask]: player, target, targettarget, party, mt, nonmt, subgroup")
-    writeLine(" [type]: heal (auto), ht (force Healing Touch), rg (force Regrowth), hot (Rejuvenation)")
-    writeLine(" [mod]: max (max rank), spam (spam hot max rank, no hp check)")
+    writeLine("== QUICKHEAL DRUID ==")
+    -- =========================================================
+    -- BASIC USAGE
+    -- =========================================================
+    writeLine(" ")
+    writeLine("Basic usage:")
+    writeLine("/qh [target] [type] [mode]")
+    writeLine(" ")
+    writeLine("Targets:")
+    writeLine(" player | target | targettarget | party | mt | nonmt | subgroup")
+    writeLine(" ")
+    writeLine("Types:")
+    writeLine(" heal  - Smart heal (HT or RG via slider)")
+    writeLine(" ht    - Force Healing Touch")
+    writeLine(" rg    - Force Regrowth")
+    writeLine(" hot   - Rejuvenation")
+    writeLine(" ")
+    writeLine("Modes:")
+    writeLine(" max   - Use highest rank available")
+    writeLine(" spam  - (HOT only) spam max rank without HP check")
+    -- =========================================================
+    -- EXAMPLES
+    -- =========================================================
+    writeLine(" ")
+    writeLine("Examples:")
+    writeLine("/qh                 - Smart heal (slider decides HT or RG)")
+    writeLine("/qh heal max        - Smart heal using max ranks")
+    writeLine("/qh ht              - Force Healing Touch (normal rank)")
+    writeLine("/qh ht max          - Force max rank Healing Touch")
+    writeLine("/qh rg              - Force Regrowth (normal rank)")
+    writeLine("/qh rg max          - Force max rank Regrowth")
+    writeLine("/qh hot spam        - Spam max Rejuvenation")
+    -- =========================================================
+    -- SETTINGS
+    -- =========================================================
+    writeLine(" ")
+    writeLine("Settings:")
+    writeLine("/qh cfg             - Open configuration panel")
+    writeLine("/qh toggle          - Toggle heal threshold mode (slider)")
+    writeLine("/qh downrank | dr   - Limit usable spell ranks")
+    writeLine("/qh tanklist | tl   - Toggle main tank list")
+    writeLine("/qh reset           - Reset all settings")
+    -- =========================================================
+    -- DEBUG / DEV
+    -- =========================================================
+    writeLine(" ")
+    writeLine("Debug:")
+    writeLine("/qh test on|off     - Test mode (ignore HP thresholds)")
+    writeLine("/qh debug on|off    - Debug logs")
+    writeLine("/qh dll             - DLL status report")
 end
