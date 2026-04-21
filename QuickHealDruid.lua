@@ -1,5 +1,5 @@
 -- QuickHeal Druid Module (Refactored) 
--- Consolidated spell selection with shared helper functions
+-- Consolidated spell selection with shared helper functions 
 
 local function writeLine(s, r, g, b)
     if DEFAULT_CHAT_FRAME then
