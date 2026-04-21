@@ -137,11 +137,8 @@ local function CheckDruidBuffs(inCombat, manaLeft, healneed, mods)
     return inCombat, manaLeft, healneed, forceHTinCombat
 end
 
--- Unified heal spell selection (works with or without target)
--- target: unit ID or nil (for NoTarget mode)
--- maxhealth, healDeficit, hdb, incombat: used when target is nil
-function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceMaxHPS, maxhealth, healDeficit, hdb,
-                                            incombat)
+function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceMaxHPS, maxhealth, healDeficit, hdb, incombat)
+
     local SpellID = nil
     local HealSize = 0
     multiplier = multiplier or 1
@@ -150,8 +147,11 @@ function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceM
     local RatioHealthy = QuickHeal_GetRatioHealthy()
     local debug = QuickHeal_debug
 
-    -- Get health info
+    -- =========================
+    -- HEALTH CALCULATION
+    -- =========================
     local healneed, Health, HDB
+
     if target then
         if QuickHeal_UnitHasHealthInfo(target) then
             healneed = QH_GetUnitMaxHealth(target) - QH_GetUnitHealth(target)
@@ -160,6 +160,7 @@ function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceM
             healneed = QuickHeal_EstimateUnitHealNeed(target, true)
             Health = QH_GetUnitHealth(target) / 100
         end
+
         HDB = QuickHeal_GetHealModifier(target)
         incombat = UnitAffectingCombat('player') or UnitAffectingCombat(target)
     else
@@ -170,131 +171,236 @@ function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceM
         incombat = UnitAffectingCombat('player') or incombat
     end
 
-    debug("Target debuff healing modifier", HDB)
     healneed = healneed / HDB
 
-    -- Return if no target needs healing
-    if target and not target then
-        return nil, 0
-    end
-
-    -- Check for overheal
-    if multiplier and multiplier > 1.0 then
-        jgpprint(">>> multiplier is " .. multiplier .. " <<<")
-    end
-
-    -- Get modifiers
+    -- =========================
+    -- MANA / BUFFS
+    -- =========================
     local mods = GetDruidModifiers()
     local ManaLeft = QH_GetUnitMana('player')
 
-    -- Check buffs
     local forceHTinCombat
     incombat, ManaLeft, healneed, forceHTinCombat = CheckDruidBuffs(incombat, ManaLeft, healneed, mods)
 
-    -- Detect Nature's Grace for NoTarget mode (affects mana limit)
+    -- Nature's Grace tweak
     if not target and QuickHeal_DetectBuff('player', "Spell_Nature_NaturesBlessing") and
         healneed < ((219 + mods.healMod25 * PF[14]) * mods.gonMod * 2.8) and
         not QuickHeal_DetectBuff('player', "Spell_Nature_Regenerate") then
         ManaLeft = 110 * mods.tsMod * mods.mgMod
     end
 
-    -- Get spell IDs
+    -- =========================
+    -- SPELL TABLES
+    -- =========================
     local SpellIDsHT = QuickHeal_GetSpellIDs(QUICKHEAL_SPELL_HEALING_TOUCH)
     local SpellIDsRG = QuickHeal_GetSpellIDs(QUICKHEAL_SPELL_REGROWTH)
 
     local maxRankHT = table.getn(SpellIDsHT)
     local maxRankRG = table.getn(SpellIDsRG)
 
-    debug(string.format("Found HT up to rank %d, RG up to rank %d", maxRankHT, maxRankRG))
+    local debugStr = string.format("HT %d / RG %d", maxRankHT, maxRankRG)
+    debug(debugStr)
 
-    -- Get downrank and minrank settings
+    -- =========================
+    -- SETTINGS
+    -- =========================
     local downRankFH = QuickHealVariables.DownrankValueFH or 0
     local downRankNH = QuickHealVariables.DownrankValueNH or 0
     local minRankFH = QuickHealVariables.MinrankValueFH or 1
     local minRankNH = QuickHealVariables.MinrankValueNH or 1
 
-    -- Combat multipliers
     local k, K = QuickHeal_GetCombatMultipliers(incombat)
 
-    local TargetIsHealthy = Health > RatioHealthy -- NOTE: needs to be ">" for Regrowth to be used out of combat
+    local TargetIsHealthy = Health > RatioHealthy
+
     local gonMod = mods.gonMod
     local tsMod = mods.tsMod
     local mgMod = mods.mgMod
     local iregMod = mods.iregMod
-    local healMod15, healMod20, healMod25, healMod30, healMod35 = mods.healMod15, mods.healMod20, mods.healMod25,
-        mods.healMod30, mods.healMod35
+
+    local healMod15 = mods.healMod15
+    local healMod20 = mods.healMod20
+    local healMod25 = mods.healMod25
+    local healMod30 = mods.healMod30
+    local healMod35 = mods.healMod35
     local healModRG = mods.healModRG
 
-    if TargetIsHealthy then
-        debug("Target is healthy", Health)
+    -- =========================
+    -- HEAL TYPE RESOLUTION
+    -- =========================
+    local forcedHT = (healType == "ht")
+    local forcedRG = (healType == "rg")
+
+    local useHT
+
+    if forcedHT then
+        useHT = true
+    elseif forcedRG then
+        useHT = false
+    else
+        -- AUTO MODE (slider)
+        useHT = TargetIsHealthy or maxRankRG < 1 or forceHTinCombat or (not target)
     end
 
-    -- Use Healing Touch when forced via healType, target is healthy, Regrowth unavailable, or forceHTinCombat
-    local useHT = (healType == "ht") or
-        (healType ~= "rg" and (TargetIsHealthy or maxRankRG < 1 or forceHTinCombat or (not target and not forceMaxHPS)))
+    -- =========================
+    -- HEALING TOUCH
+    -- =========================
     if useHT then
-        debug("Using Healing Touch")
+
         if Health < RatioFull or QHV.TestMode or (QHV.PrecastAggro and QuickHeal_UnitHasAggro(target)) then
-            SpellID = SpellIDsHT[1]; HealSize = (44* gonMod + (healMod15 * PF[1])) 
-            if (healneed > (100* gonMod + (healMod20 * PF[8])) * k or 2 <= minRankNH) and ManaLeft >= 55 * tsMod * mgMod and maxRankHT >= 2 and downRankNH >= 2 and SpellIDsHT[2] then
-                SpellID = SpellIDsHT[2]; HealSize = (100* gonMod + healMod20 * PF[8]) 
+
+            -- =========================
+            -- HT MAX MODE
+            -- =========================
+            if forceMaxHPS and maxRankHT > 0 then
+                debug("HT max mode")
+
+                local manaHT = {
+                    [1]=25,[2]=55,[3]=110,[4]=185,[5]=270,
+                    [6]=335,[7]=405,[8]=495,[9]=600,[10]=720,[11]=800
+                }
+
+                local healHT = {
+                    [1]=44,[2]=100,[3]=219,[4]=404,[5]=633,
+                    [6]=818,[7]=1028,[8]=1313,[9]=1656,[10]=2060,[11]=2472
+                }
+
+                for i = maxRankHT, 1, -1 do
+                    if SpellIDsHT[i] and ManaLeft >= manaHT[i] * tsMod * mgMod then
+                        SpellID = SpellIDsHT[i]
+                        HealSize = healHT[i] * gonMod
+                        return SpellID, HealSize * HDB
+                    end
+                end
             end
-            if (healneed > (219 * gonMod + (healMod25 * PF[14])) * K or 3 <= minRankNH) and ManaLeft >= 110 * tsMod * mgMod and maxRankHT >= 3 and downRankNH >= 3 and SpellIDsHT[3] then
-                SpellID = SpellIDsHT[3]; HealSize = (219* gonMod + healMod25 * PF[14]) 
+
+            -- =========================
+            -- HT NORMAL MODE
+            -- =========================
+            SpellID = SpellIDsHT[1]
+            HealSize = (44 * gonMod + healMod15 * PF[1])
+
+            if (healneed > (100 * gonMod + healMod20 * PF[8]) * k or 2 <= minRankNH)
+                and ManaLeft >= 55 * tsMod * mgMod and maxRankHT >= 2 and downRankNH >= 2 and SpellIDsHT[2] then
+                SpellID = SpellIDsHT[2]
+                HealSize = (100 * gonMod + healMod20 * PF[8])
             end
-            if (healneed > (404* gonMod + healMod30) * K or 4 <= minRankNH) and ManaLeft >= 185 * tsMod * mgMod and maxRankHT >= 4 and downRankNH >= 4 and SpellIDsHT[4] then
+
+            if (healneed > (219 * gonMod + healMod25 * PF[14]) * K or 3 <= minRankNH)
+                and ManaLeft >= 110 * tsMod * mgMod and maxRankHT >= 3 and downRankNH >= 3 and SpellIDsHT[3] then
+                SpellID = SpellIDsHT[3]
+                HealSize = (219 * gonMod + healMod25 * PF[14])
+            end
+	    if (healneed > (404* gonMod + healMod30) * K or 4 <= minRankNH) 
+                and ManaLeft >= 185 * tsMod * mgMod and maxRankHT >= 4 and downRankNH >= 4 and SpellIDsHT[4] then
                 SpellID = SpellIDsHT[4]; HealSize = (404* gonMod + healMod30) 
             end
-            if (healneed > (633* gonMod + healMod35) * K or 5 <= minRankNH) and ManaLeft >= 270 * tsMod * mgMod and maxRankHT >= 5 and downRankNH >= 5 and SpellIDsHT[5] then
+            if (healneed > (633* gonMod + healMod35) * K or 5 <= minRankNH) 
+                and ManaLeft >= 270 * tsMod * mgMod and maxRankHT >= 5 and downRankNH >= 5 and SpellIDsHT[5] then
                 SpellID = SpellIDsHT[5]; HealSize = (633* gonMod + healMod35) 
             end
-            if (healneed > (818* gonMod + healMod35) * K or 6 <= minRankNH) and ManaLeft >= 335 * tsMod * mgMod and maxRankHT >= 6 and downRankNH >= 6 and SpellIDsHT[6] then
+            if (healneed > (818* gonMod + healMod35) * K or 6 <= minRankNH) 
+                and ManaLeft >= 335 * tsMod * mgMod and maxRankHT >= 6 and downRankNH >= 6 and SpellIDsHT[6] then
                 SpellID = SpellIDsHT[6]; HealSize = (818* gonMod + healMod35) 
             end
-            if (healneed > (1028* gonMod + healMod35) * K or 7 <= minRankNH) and ManaLeft >= 405 * tsMod * mgMod and maxRankHT >= 7 and downRankNH >= 7 and SpellIDsHT[7] then
+            if (healneed > (1028* gonMod + healMod35) * K or 7 <= minRankNH) 
+                and ManaLeft >= 405 * tsMod * mgMod and maxRankHT >= 7 and downRankNH >= 7 and SpellIDsHT[7] then
                 SpellID = SpellIDsHT[7]; HealSize = (1028* gonMod + healMod35) 
             end
-            if (healneed > (1313* gonMod + healMod35) * K or 8 <= minRankNH) and ManaLeft >= 495 * tsMod * mgMod and maxRankHT >= 8 and downRankNH >= 8 and SpellIDsHT[8] then
+            if (healneed > (1313* gonMod + healMod35) * K or 8 <= minRankNH) 
+                and ManaLeft >= 495 * tsMod * mgMod and maxRankHT >= 8 and downRankNH >= 8 and SpellIDsHT[8] then
                 SpellID = SpellIDsHT[8]; HealSize = (1313* gonMod + healMod35) 
             end
-            if (healneed > (1656* gonMod + healMod35) * K or 9 <= minRankNH) and ManaLeft >= 600 * tsMod * mgMod and maxRankHT >= 9 and downRankNH >= 9 and SpellIDsHT[9] then
+            if (healneed > (1656* gonMod + healMod35) * K or 9 <= minRankNH) 
+                and ManaLeft >= 600 * tsMod * mgMod and maxRankHT >= 9 and downRankNH >= 9 and SpellIDsHT[9] then
                 SpellID = SpellIDsHT[9]; HealSize = (1656* gonMod + healMod35) 
             end
-            if (healneed > (2060 * gonMod + healMod35) * K or 10 <= minRankNH) and ManaLeft >= 720 * tsMod * mgMod and maxRankHT >= 10 and downRankNH >= 10 and SpellIDsHT[10] then
+            if (healneed > (2060 * gonMod + healMod35) * K or 10 <= minRankNH) 
+                and ManaLeft >= 720 * tsMod * mgMod and maxRankHT >= 10 and downRankNH >= 10 and SpellIDsHT[10] then
                 SpellID = SpellIDsHT[10]; HealSize = (2060* gonMod + healMod35) 
             end
-            if (healneed > (2472 * gonMod + healMod35) * K or 11 <= minRankNH) and ManaLeft >= 800 * tsMod * mgMod and maxRankHT >= 11 and downRankNH >= 11 and SpellIDsHT[11] then
+            if (healneed > (2472 * gonMod + healMod35) * K or 11 <= minRankNH) 
+                and ManaLeft >= 800 * tsMod * mgMod and maxRankHT >= 11 and downRankNH >= 11 and SpellIDsHT[11] then
                 SpellID = SpellIDsHT[11]; HealSize = (2472* gonMod + healMod35) 
             end
+
         end
+
+    -- =========================
+    -- REGROWTH
+    -- =========================
     else
-        -- Unhealthy target, has Regrowth - use Regrowth
-        debug("Target unhealthy and Regrowth available, will use Regrowth")
+
         if Health < RatioFull or QHV.TestMode or (QHV.PrecastAggro and QuickHeal_UnitHasAggro(target)) then
-            SpellID = SpellIDsRG[1]; HealSize = (91* gonMod + (healModRG * PF.RG1)) * iregMod 
-            if (healneed > (176* gonMod + (healModRG * PF.RG2)) * iregMod * k or 2 <= minRankFH) and ManaLeft >= 205 * tsMod * mgMod and maxRankRG >= 2 and downRankFH >= 2 and SpellIDsRG[2] then
-                SpellID = SpellIDsRG[2]; HealSize = (176* gonMod + (healModRG * PF.RG2)) * iregMod 
+
+            -- =========================
+            -- RG MAX MODE
+            -- =========================
+            if forceMaxHPS and maxRankRG > 0 then
+                debug("RG max mode")
+
+                local manaRG = {
+                    [1]=120,[2]=205,[3]=280,[4]=350,[5]=420,
+                    [6]=510,[7]=615,[8]=740,[9]=880
+                }
+
+                local healRG = {
+                    [1]=91,[2]=176,[3]=257,[4]=339,[5]=431,
+                    [6]=543,[7]=686,[8]=857,[9]=1061
+                }
+
+                for i = maxRankRG, 1, -1 do
+                    if SpellIDsRG[i] and ManaLeft >= manaRG[i] * tsMod * mgMod then
+                        SpellID = SpellIDsRG[i]
+                        HealSize = (healRG[i] * gonMod + healModRG) * iregMod
+                        return SpellID, HealSize * HDB
+                    end
+                end
             end
-            if (healneed > (257* gonMod + healModRG) * iregMod * k or 3 <= minRankFH) and ManaLeft >= 280 * tsMod * mgMod and maxRankRG >= 3 and downRankFH >= 3 and SpellIDsRG[3] then
-                SpellID = SpellIDsRG[3]; HealSize = (257* gonMod + healModRG) * iregMod 
+
+            -- =========================
+            -- RG NORMAL MODE
+            -- =========================
+            SpellID = SpellIDsRG[1]
+            HealSize = (91 * gonMod + healModRG * PF.RG1) * iregMod
+
+            if (healneed > (176 * gonMod + healModRG * PF.RG2) * iregMod * k or 2 <= minRankFH)
+                and ManaLeft >= 205 * tsMod * mgMod and maxRankRG >= 2 and downRankFH >= 2 then
+                SpellID = SpellIDsRG[2]; HealSize = (176 * gonMod + healModRG * PF.RG2) * iregMod
             end
-            if (healneed > (339* gonMod + healModRG) * iregMod * k or 4 <= minRankFH) and ManaLeft >= 350 * tsMod * mgMod and maxRankRG >= 4 and downRankFH >= 4 and SpellIDsRG[4] then
-                SpellID = SpellIDsRG[4]; HealSize = (339* gonMod + healModRG) * iregMod 
+
+            if (healneed > (257 * gonMod + healModRG) * iregMod * k or 3 <= minRankFH)
+                and ManaLeft >= 280 * tsMod * mgMod and maxRankRG >= 3 and downRankFH >= 3 then
+                SpellID = SpellIDsRG[3]; HealSize = (257 * gonMod + healModRG) * iregMod
             end
-            if (healneed > (431* gonMod  + healModRG) * iregMod * k or 5 <= minRankFH) and ManaLeft >= 420 * tsMod * mgMod and maxRankRG >= 5 and downRankFH >= 5 and SpellIDsRG[5] then
-                SpellID = SpellIDsRG[5]; HealSize = (431* gonMod + healModRG) * iregMod 
+            if (healneed > (339 * gonMod + healModRG) * iregMod * k or 4 <= minRankFH)
+                and ManaLeft >= 350 * tsMod * mgMod and maxRankRG >= 4 and downRankFH >= 4 then
+                SpellID = SpellIDsRG[4]; HealSize = (339 * gonMod + healModRG) * iregMod
             end
-            if (healneed > (543* gonMod + healModRG) * iregMod * k or 6 <= minRankFH) and ManaLeft >= 510 * tsMod * mgMod and maxRankRG >= 6 and downRankFH >= 6 and SpellIDsRG[6] then
-                SpellID = SpellIDsRG[6]; HealSize = (543* gonMod + healModRG) * iregMod 
+
+            if (healneed > (431 * gonMod + healModRG) * iregMod * k or 5 <= minRankFH)
+                and ManaLeft >= 420 * tsMod * mgMod and maxRankRG >= 5 and downRankFH >= 5 then
+                SpellID = SpellIDsRG[5]; HealSize = (431 * gonMod + healModRG) * iregMod
             end
-            if (healneed > (686* gonMod + healModRG) * iregMod * k or 7 <= minRankFH) and ManaLeft >= 615 * tsMod * mgMod and maxRankRG >= 7 and downRankFH >= 7 and SpellIDsRG[7] then
-                SpellID = SpellIDsRG[7]; HealSize = (686* gonMod + healModRG) * iregMod 
+
+            if (healneed > (543 * gonMod + healModRG) * iregMod * k or 6 <= minRankFH)
+                and ManaLeft >= 510 * tsMod * mgMod and maxRankRG >= 6 and downRankFH >= 6 then
+                SpellID = SpellIDsRG[6]; HealSize = (543 * gonMod + healModRG) * iregMod
             end
-            if (healneed > (857* gonMod + healModRG) * iregMod * k or 8 <= minRankFH) and ManaLeft >= 740 * tsMod * mgMod and maxRankRG >= 8 and downRankFH >= 8 and SpellIDsRG[8] then
-                SpellID = SpellIDsRG[8]; HealSize = (857* gonMod + healModRG) * iregMod 
+
+            if (healneed > (686 * gonMod + healModRG) * iregMod * k or 7 <= minRankFH)
+                and ManaLeft >= 615 * tsMod * mgMod and maxRankRG >= 7 and downRankFH >= 7 then
+                SpellID = SpellIDsRG[7]; HealSize = (686 * gonMod + healModRG) * iregMod
             end
-            if (healneed > (1061* gonMod + healModRG) * iregMod * k or 9 <= minRankFH) and ManaLeft >= 880 * tsMod * mgMod and maxRankRG >= 9 and downRankFH >= 9 and SpellIDsRG[9] then
-                SpellID = SpellIDsRG[9]; HealSize = (1061* gonMod + healModRG) * iregMod 
+            
+            if (healneed > (857 * gonMod + healModRG) * iregMod * k or 8 <= minRankFH)
+                and ManaLeft >= 740 * tsMod * mgMod and maxRankRG >= 8 and downRankFH >= 8 then
+                SpellID = SpellIDsRG[8]; HealSize = (857 * gonMod + healModRG) * iregMod
+            end
+
+            if (healneed > (1061 * gonMod + healModRG) * iregMod * k or 9 <= minRankFH)
+                and ManaLeft >= 880 * tsMod * mgMod and maxRankRG >= 9 and downRankFH >= 9 then
+                SpellID = SpellIDsRG[9]; HealSize = (1061 * gonMod + healModRG) * iregMod
             end
         end
     end
@@ -456,138 +562,205 @@ function QuickHeal_Druid_FindHoTSpellToUseNoTarget(maxhealth, healDeficit, healT
     return QuickHeal_Druid_FindHoTSpellToUse(nil, healType, forceMaxRank, maxhealth, healDeficit, hdb, incombat)
 end
 
--- Command handler
 function QuickHeal_Command_Druid(msg)
-    local _, _, arg1, arg2, arg3 = string.find(msg, "%s?(%w+)%s?(%w+)%s?(%w+)")
 
-    -- Match 3 arguments
-    if arg1 and arg2 and arg3 then
-        if arg1 == "player" or arg1 == "target" or arg1 == "targettarget" or arg1 == "party" or arg1 == "subgroup" or arg1 == "mt" or arg1 == "nonmt" then
-            if arg2 == "heal" and arg3 == "max" then
-                QuickHeal(arg1, nil, nil, true)
+    local args = {}
+    for word in string.gfind(string.lower(msg), "%S+") do
+        table.insert(args, word)
+    end
+
+    local a1, a2, a3 = args[1], args[2], args[3]
+
+    -- =========================================================
+    -- 3 ARGS (mask + action + mod)
+    -- =========================================================
+    if a1 and a2 and a3 then
+
+        local mask = a1
+
+        if mask == "player"
+        or mask == "target"
+        or mask == "targettarget"
+        or mask == "party"
+        or mask == "subgroup"
+        or mask == "mt"
+        or mask == "nonmt" then
+
+            -- /qh mask heal max
+            if a2 == "heal" and a3 == "max" then
+                QuickHeal(mask, nil, nil, true)
                 return
             end
-            if arg2 == "hot" and arg3 == "spam" then
-                QuickHOT(arg1, nil, nil, true, true)
+
+            -- /qh mask ht max
+            if a2 == "ht" and a3 == "max" then
+                QuickHeal(mask, nil, { healType = "ht" }, true)
                 return
             end
-            if arg2 == "hot" and arg3 == "max" then
-                QuickHOT(arg1, nil, nil, true, false)
+
+            -- /qh mask rg max
+            if a2 == "rg" and a3 == "max" then
+                QuickHeal(mask, nil, { healType = "rg" }, true)
+                return
+            end
+
+            -- /qh mask hot spam
+            if a2 == "hot" and a3 == "spam" then
+                QuickHOT(mask, nil, nil, true, true)
+                return
+            end
+
+            -- /qh mask hot max
+            if a2 == "hot" and a3 == "max" then
+                QuickHOT(mask, nil, nil, true, false)
                 return
             end
         end
     end
 
-    -- Match 2 arguments
-    local _, _, arg4, arg5 = string.find(msg, "%s?(%w+)%s?(%w+)")
+    -- =========================================================
+    -- 2 ARGS (global commands)
+    -- =========================================================
+    if a1 and a2 then
 
-    if arg4 and arg5 then
-        if arg4 == "debug" then
-            if arg5 == "on" then
-                QHV.DebugMode = true
-                return
-            elseif arg5 == "off" then
-                QHV.DebugMode = false
-                return
-            end
+        -- debug
+        if a1 == "debug" then
+            QHV.DebugMode = (a2 == "on")
+            return
         end
-        if arg4 == "test" then
-            if arg5 == "on" then
-                QHV.TestMode = true
-                writeLine("QuickHeal: Test mode enabled (ignoring health thresholds)", 0, 1, 0)
-                return
-            elseif arg5 == "off" then
-                QHV.TestMode = false
-                writeLine("QuickHeal: Test mode disabled", 1, 1, 0)
-                return
-            end
+
+        -- test mode
+        if a1 == "test" then
+            QHV.TestMode = (a2 == "on")
+            writeLine("QuickHeal: Test mode " .. (QHV.TestMode and "ON" or "OFF"))
+            return
         end
-        if arg4 == "heal" and arg5 == "max" then
+
+        -- GLOBAL HEAL MAX (AUTO MODE)
+        if a1 == "heal" and a2 == "max" then
             QuickHeal(nil, nil, nil, true)
             return
         end
-        if arg4 == "hot" and arg5 == "max" then
+
+        -- HOT MODES
+        if a1 == "hot" and a2 == "max" then
             QuickHOT(nil, nil, nil, true, false)
             return
         end
-        if arg4 == "hot" and arg5 == "spam" then
+
+        if a1 == "hot" and a2 == "spam" then
             QuickHOT(nil, nil, nil, true, true)
             return
         end
-        if arg4 == "player" or arg4 == "target" or arg4 == "targettarget" or arg4 == "party" or arg4 == "subgroup" or arg4 == "mt" or arg4 == "nonmt" then
-            if arg5 == "hot" then
-                QuickHOT(arg4, nil, nil, false, false)
+
+        -- DIRECT TARGET TYPE COMMANDS
+        if a1 == "player"
+        or a1 == "target"
+        or a1 == "targettarget"
+        or a1 == "party"
+        or a1 == "subgroup"
+        or a1 == "mt"
+        or a1 == "nonmt" then
+
+            if a2 == "heal" then
+                QuickHeal(a1, nil, nil, false)
                 return
             end
-            if arg5 == "heal" then
-                QuickHeal(arg4, nil, nil, false)
+
+            if a2 == "ht" then
+                QuickHeal(a1, nil, { healType = "ht" }, false)
                 return
             end
-            if arg5 == "ht" then
-                QuickHeal(arg4, nil, {healType = "ht"})
+
+            if a2 == "rg" then
+                QuickHeal(a1, nil, { healType = "rg" }, false)
                 return
             end
-            if arg5 == "rg" then
-                QuickHeal(arg4, nil, {healType = "rg"})
+
+            if a2 == "hot" then
+                QuickHOT(a1, nil, nil, false, false)
                 return
             end
         end
     end
 
-    -- Match 1 argument
+    -- =========================================================
+    -- 1 ARG (simple commands)
+    -- =========================================================
     local cmd = string.lower(msg)
+
+    if cmd == "" then
+        QuickHeal(nil)
+        return
+    end
+
+    if cmd == "heal" then
+        QuickHeal()
+        return
+    end
+
+    if cmd == "ht" then
+        QuickHeal(nil, nil, { healType = "ht" })
+        return
+    end
+
+    if cmd == "rg" then
+        QuickHeal(nil, nil, { healType = "rg" })
+        return
+    end
+
+    if cmd == "hot" then
+        QuickHOT()
+        return
+    end
+
+    if cmd == "ht max" then
+        QuickHeal(nil, nil, { healType = "ht" }, true)
+        return
+    end
+
+    if cmd == "rg max" then
+        QuickHeal(nil, nil, { healType = "rg" }, true)
+        return
+    end
+
+    if cmd == "heal max" then
+        QuickHeal(nil, nil, nil, true)
+        return
+    end
 
     if cmd == "cfg" then
         QuickHeal_ToggleConfigurationPanel()
         return
     end
+
     if cmd == "toggle" then
         QuickHeal_Toggle_Healthy_Threshold()
         return
     end
+
     if cmd == "downrank" or cmd == "dr" or cmd == "minrank" or cmd == "ranks" then
         ToggleDownrankWindow()
         return
     end
+
     if cmd == "tanklist" or cmd == "tl" then
         QH_ShowHideMTListUI()
         return
     end
+
     if cmd == "reset" then
         QuickHeal_SetDefaultParameters()
-        writeLine(QuickHealData.name .. " reset to default configuration", 0, 0, 1)
-        QuickHeal_ToggleConfigurationPanel()
-        QuickHeal_ToggleConfigurationPanel()
+        writeLine(QuickHealData.name .. " reset to default configuration")
         return
     end
+
     if cmd == "dll" then
         QuickHeal_ReportDLLStatus()
         return
     end
-    if cmd == "heal" then
-        QuickHeal()
-        return
-    end
-    if cmd == "ht" then
-        QuickHeal(nil, nil, {healType = "ht"})
-        return
-    end
-    if cmd == "rg" then
-        QuickHeal(nil, nil, {healType = "rg"})
-        return
-    end
-    if cmd == "hot" then
-        QuickHOT()
-        return
-    end
-    if cmd == "" then
-        QuickHeal(nil)
-        return
-    elseif cmd == "player" or cmd == "target" or cmd == "targettarget" or cmd == "party" or cmd == "subgroup" or cmd == "mt" or cmd == "nonmt" then
-        QuickHeal(cmd)
-        return
-    end
 
+	
     -- Print usage
     writeLine("== QUICKHEAL DRUID ==")
     -- =========================================================
