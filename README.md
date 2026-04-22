@@ -81,14 +81,17 @@ Toggle with `/qh toggle`.
 
 | Command | Description |
 |---------|-------------|
-| `/qh` | Optimal Healing Touch or Regrowth based on health threshold |
-| `/qh ht` | Force Healing Touch |
-| `/qh rg` | Force Regrowth |
+| `/qh` or `/qh heal` | Optimal Healing Touch or Regrowth based on health threshold |
+| `/qh heal max` | Max rank Healing Touch or Regrowth based on health threshold |
+| `/qh ht` | Optimal Healing Touch only |
+| `/qh ht max` | Max rank Healing Touch only |
+| `/qh rg` | Optimal Regrowth only |
+| `/qh rg max` | Max rank Regrowth only |
 | `/qh hot` | Rejuvenation on lowest health target without an active HoT |
 | `/qh hot max` | Rejuvenation Max rank on lowest health target without an active HoT |
 | `/qh hot spam` | Rejuvenation Max rank Spam ignoring hp check |
-| `/qh [mask] ht` | Force Healing Touch with a target mask |
-| `/qh [mask] rg` | Force Regrowth with a target mask |
+| `/qh [mask] ht` | Optimal Healing Touch with a target mask |
+| `/qh [mask] rg` | Optimal Regrowth with a target mask |
 
 ### Other useful Macros
 
@@ -96,11 +99,6 @@ Toggle with `/qh toggle`.
 /script QuickHeal(nil,'Swiftmend')
 ```
 Cast Swiftmend (works while moving).
-
-```
-/script QuickHeal(nil,'Regrowth')
-```
-Force max rank Regrowth regardless of heal need.
 
 ---
 
