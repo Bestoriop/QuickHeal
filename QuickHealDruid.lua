@@ -1,5 +1,5 @@
 -- QuickHeal Druid Module (Refactored) 
--- Consolidated spell selection with shared helper functions 
+-- Consolidated spell selection with shared helper functions
 
 local function writeLine(s, r, g, b)
     if DEFAULT_CHAT_FRAME then
@@ -22,7 +22,7 @@ function QuickHeal_Druid_GetRatioHealthyExplanation()
 
     if RatioHealthy >= RatioFull then
         return QUICKHEAL_SPELL_REGROWTH ..
-            " will always be used in and out of combat, and " .. QUICKHEAL_SPELL_HEALING_TOUCH .. " will never be used. "
+            " will always be used in combat, and " .. QUICKHEAL_SPELL_HEALING_TOUCH .. " will be used out of combat. "
     else
         if RatioHealthy > 0 then
             return QUICKHEAL_SPELL_REGROWTH ..
@@ -74,9 +74,9 @@ local function GetDruidModifiers()
 end
 
 -- Check for Druid-specific buffs that affect healing
--- Returns: inCombat (adjusted), manaLeft (adjusted), healneed (adjusted), forceHTinCombat
-local function CheckDruidBuffs(inCombat, manaLeft, healneed, mods)
-    local forceHTinCombat = false
+-- Returns: incombat (adjusted), manaLeft (adjusted), healneed (adjusted), buffedHT
+local function CheckDruidBuffs(incombat, manaLeft, healneed, mods)
+    local buffedHT = false
 
     -- Nampower: use aura spell ID array for reliable detection
     if GetUnitField then
@@ -91,13 +91,13 @@ local function CheckDruidBuffs(inCombat, manaLeft, healneed, mods)
                         healneed = 10 ^ 6
                     elseif spellId == 17116 then -- Nature's Swiftness
                         QuickHeal_debug("BUFF: Nature's Swiftness [" .. spellId .. "] (HT forced)")
-                        forceHTinCombat = true
+                        incombat = false
                     elseif spellId == 18803 then -- Focus (Hand of Edward the Odd)
                         QuickHeal_debug("BUFF: Hand of Edward the Odd [" .. spellId .. "] (out of combat healing forced)")
-                        inCombat = false
+                        incombat = false
                     elseif spellId == 24542 then -- Nimble Healing Touch (Wushoolay's Charm of Nature)
                         QuickHeal_debug("BUFF: Wushoolay [" .. spellId .. "] (healing touch forced)")
-                        forceHTinCombat = true
+                        buffedHT = true
                     end
                 end
             end
@@ -114,27 +114,26 @@ local function CheckDruidBuffs(inCombat, manaLeft, healneed, mods)
     end
 
     -- Detect Nature's Swiftness (next nature spell is instant cast)
-    if not forceHTinCombat and QuickHeal_DetectBuff('player', "Spell_Nature_RavenForm") then
+    if incombat and QuickHeal_DetectBuff('player', "Spell_Nature_RavenForm") then
         QuickHeal_debug("BUFF: Nature's Swiftness (texture fallback)")
-        forceHTinCombat = true
+        incombat = false
     end
 
     -- Detect Hand of Edward the Odd (next spell is instant cast)
     -- Note: Must exclude "Protective Light" which uses icon "Spell_Holy_SearingLightPriest"
-    if not (inCombat == false) and
-       QuickHeal_DetectBuff('player', "Spell_Holy_SearingLight") and
+    if incombat and QuickHeal_DetectBuff('player', "Spell_Holy_SearingLight") and
        not QuickHeal_DetectBuff('player', "Spell_Holy_SearingLightPriest") then
         QuickHeal_debug("BUFF: Hand of Edward the Odd (texture fallback)")
-        inCombat = false
+        incombat = false
     end
 
     -- Detect Wushoolay's Charm of Nature (Trinket from Zul'Gurub)
-    if not forceHTinCombat and QuickHeal_DetectBuff('player', "Spell_Nature_Regenerate") then
+    if not buffedHT and QuickHeal_DetectBuff('player', "Spell_Nature_Regenerate") then
         QuickHeal_debug("BUFF: Wushoolay (texture fallback)")
-        forceHTinCombat = true
+        buffedHT = true
     end
 
-    return inCombat, manaLeft, healneed, forceHTinCombat
+    return incombat, manaLeft, healneed, buffedHT
 end
 
 function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceMaxHPS, maxhealth, healDeficit, hdb, incombat)
@@ -179,8 +178,8 @@ function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceM
     local mods = GetDruidModifiers()
     local ManaLeft = QH_GetUnitMana('player')
 
-    local forceHTinCombat
-    incombat, ManaLeft, healneed, forceHTinCombat = CheckDruidBuffs(incombat, ManaLeft, healneed, mods)
+    local buffedHT
+    incombat, ManaLeft, healneed, buffedHT = CheckDruidBuffs(incombat, ManaLeft, healneed, mods)
 
     -- Nature's Grace tweak
     if not target and QuickHeal_DetectBuff('player', "Spell_Nature_NaturesBlessing") and
@@ -228,19 +227,25 @@ function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceM
     -- =========================
     -- HEAL TYPE RESOLUTION
     -- =========================
-    local forcedHT = (healType == "ht")
-    local forcedRG = (healType == "rg")
 
-    local useHT
-
-    if forcedHT then
-        useHT = true
-    elseif forcedRG then
-        useHT = false
-    else
-        -- AUTO MODE (slider)
-        useHT = TargetIsHealthy or maxRankRG < 1 or forceHTinCombat or (not target)
-    end
+	local forceHT = (healType == "ht") or buffedHT
+	local forceRG = (healType == "rg")
+	
+	local useHT
+	
+	if forceHT then
+	    useHT = true
+	
+	elseif forceRG then
+	    useHT = false
+	
+	else
+	    if not incombat then
+	        useHT = true
+	    else
+	        useHT = (TargetIsHealthy or maxRankRG < 1 or not target)
+	    end
+	end
 
     -- =========================
     -- HEALING TOUCH
