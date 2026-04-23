@@ -110,31 +110,10 @@ Cast Swiftmend (works while moving).
 
 | Command | Description |
 |---------|-------------|
-| `/qh` | Optimal Holy Light or Flash of Light |
-| `/qh hs` | Holy Shock on lowest health target (cancels autoattack) |
+| `/qh` or `/qh heal` | Optimal Holy Light or Flash of Light |
+| `/qh heal max` | Max rank Flash of Light or Holy Light |
+| `/qh hs` | Holy Shock on lowest health target |
 | `/qh hs max` | Max rank Holy Shock |
-| `/qh heal max` | Max rank Flash of Light (or Holy Light with Holy Judgement buff) |
-
-### Blessing of Protection
-
-```
-/run qhBoP(20)
-```
-Cast Blessing of Protection on the lowest HP ally below the given threshold (20% in this example).
-
-### Melee Paladin Macros
-
-These macros do not cancel autoattack:
-
-```
-/run qhHShock(85)
-```
-Cast max rank Holy Shock if any target is below 85% HP.
-
-```
-/run qhHStrike(93,3)
-```
-Cast Holy Strike if 3+ targets are below 93% HP.
 
 ---
 
