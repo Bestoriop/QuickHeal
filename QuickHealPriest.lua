@@ -201,7 +201,7 @@ function QuickHeal_Priest_FindHealSpellToUse(target, healType, multiplier, force
     -- =========================
     -- NORMAL HEAL (LESSER OR HEAL OR GREATER)
     -- =========================
-    elseif (not forceMaxHPS) and (TargetIsHealthy or maxRankFH < 1) then
+    elseif (not forceMaxHPS) and (not incombat or TargetIsHealthy or maxRankFH < 1) then
         if Health < QuickHealVariables.RatioFull or QHV.TestMode or (QHV.PrecastAggro and QuickHeal_UnitHasAggro(target)) then
             SpellID = SpellIDsLH[1]; HealSize = (51* shMod + healMod15 * PF[1]) 
 
