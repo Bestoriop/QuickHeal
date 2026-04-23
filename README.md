@@ -63,10 +63,10 @@ Toggle with `/qh toggle`.
 
 | Command | Description |
 |---------|-------------|
-| `/qh` | Optimal direct heal on lowest health target |
-| `/qh gh` | Force GH heal usage for T2 8b bonus |
-| `/qh hot` | Renew on lowest health target without an active HoT |
+| `/qh` or `/qh heal` | Optimal direct heal on lowest health target |
+| `/qh gh` | Force GH heal usage (T2 8p bonus) |
 | `/qh heal max` | Flash Heal Max rank |
+| `/qh hot` | Renew on lowest health target without an active HoT |
 | `/qh hot max` | Renew Max rank  |
 | `/qh hot spam` | Renew Max rank Spam ignoring HP check |
 | `/qh [mask] book` | Book of Prayer with a target mask (e.g. `/qh mt book`) |
