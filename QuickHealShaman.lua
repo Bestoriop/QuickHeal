@@ -164,7 +164,7 @@ function QuickHeal_Shaman_FindChainHealSpellToUse(target, healType, multiplier, 
     debug(string.format("Found CH up to rank %d, downrank limit: %d, minrank: %d", maxRankCH, downRankCH, minRankCH))
 
     local tfMod = mods.tfMod
-    local tfMod = mods.tmMod
+    local tmMod = mods.tmMod
     local healModCH = mods.healModCH
     local healMod25 = mods.healMod25
     local K = 0.8 -- Combat compensation for slow spells
