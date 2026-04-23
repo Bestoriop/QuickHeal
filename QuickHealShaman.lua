@@ -1,4 +1,4 @@
--- QuickHeal Shaman Module (Refactored)
+-- QuickHeal Shaman Module (Refactored) 
 -- Consolidated spell selection with shared helper functions
 
 local function writeLine(s, r, g, b)
@@ -57,7 +57,7 @@ local function GetShamanModifiers()
 
     -- Tidal Mastery Talent - increases Healing spell crit chance by 1% per rank (crit is 50% bonus so 0.5 bonus per rank)
     local tmRank = QuickHeal_GetTalentRank(1, 11)
-    mods. = 1 + 0.5 * tmRank / 100
+    mods.tmMod = 1 + 0.5 * tmRank / 100
 
     return mods
 end
