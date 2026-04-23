@@ -45,7 +45,7 @@ local function GetShamanModifiers()
 
     -- Calculate healing modifiers by cast time
     mods.healModLHW = (1.5 / 3.5) * mods.bonus
-    mods.healModCH = 0.6142 * mods.bonus -- Turtle WoW 1.18 coefficient
+    mods.healModCH = 0.7142 * mods.bonus 
     mods.healMod15 = (1.5 / 3.5) * mods.bonus
     mods.healMod20 = (2.0 / 3.5) * mods.bonus
     mods.healMod25 = (2.5 / 3.5) * mods.bonus
@@ -54,6 +54,10 @@ local function GetShamanModifiers()
     -- Tidal Focus - Decreases mana usage by 1% per rank
     local tfRank = QuickHeal_GetTalentRank(3, 2)
     mods.tfMod = 1 - tfRank / 100
+
+    -- Tidal Mastery Talent - increases Healing spell crit chance by 1% per rank (crit is 50% bonus so 0.5 bonus per rank)
+    local tmRank = QuickHeal_GetTalentRank(1, 11)
+    mods.tmMod = 1 + 0.5 * tmRank / 100
 
     return mods
 end
@@ -160,6 +164,7 @@ function QuickHeal_Shaman_FindChainHealSpellToUse(target, healType, multiplier, 
     debug(string.format("Found CH up to rank %d, downrank limit: %d, minrank: %d", maxRankCH, downRankCH, minRankCH))
 
     local tfMod = mods.tfMod
+    local tfMod = mods.tmMod
     local healModCH = mods.healModCH
     local healMod25 = mods.healMod25
     local K = 0.8 -- Combat compensation for slow spells
@@ -275,6 +280,7 @@ function QuickHeal_Shaman_FindHealSpellToUse(target, healType, multiplier, force
     local minRankNH = QuickHealVariables.MinrankValueNH or 1
 
     local tfMod = mods.tfMod
+    local tmMod = mods.tmMod
     local healModLHW = mods.healModLHW
     local healMod15, healMod20, healMod25, healMod30 = mods.healMod15, mods.healMod20, mods.healMod25, mods.healMod30
 
