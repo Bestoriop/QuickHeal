@@ -69,7 +69,7 @@ Toggle with `/qh toggle`.
 | `/qh hot` | Renew on lowest health target without an active HoT |
 | `/qh hot max` | Renew Max rank  |
 | `/qh hot spam` | Renew Max rank Spam ignoring HP check |
-| `/qh [mask] book` | Book of Prayer with a target mask (e.g. `/qh mt book`) |
+| `/qh mt heal` | Optimal direct heal on MT only |
 
 ---
 
@@ -77,7 +77,7 @@ Toggle with `/qh toggle`.
 
 **Spells used**: Healing Touch, Regrowth, Rejuvenation
 
-### Recommanded Macros
+### Recommended Macros
 
 | Command | Description |
 |---------|-------------|
@@ -90,8 +90,7 @@ Toggle with `/qh toggle`.
 | `/qh hot` | Rejuvenation on lowest health target without an active HoT |
 | `/qh hot max` | Rejuvenation Max rank on lowest health target without an active HoT |
 | `/qh hot spam` | Rejuvenation Max rank Spam ignoring hp check |
-| `/qh [mask] ht` | Optimal Healing Touch with a target mask |
-| `/qh [mask] rg` | Optimal Regrowth with a target mask |
+| `/qh mt ht` | Optimal Healing Touch on mt only |
 
 ### Other useful Macros
 
@@ -106,7 +105,7 @@ Cast Swiftmend (works while moving).
 
 **Spells used**: Holy Light, Flash of Light, Holy Shock
 
-### Commands
+### Recommended Macros
 
 | Command | Description |
 |---------|-------------|
@@ -114,6 +113,7 @@ Cast Swiftmend (works while moving).
 | `/qh heal max` | Max rank Flash of Light or Holy Light |
 | `/qh hs` | Holy Shock on lowest health target |
 | `/qh hs max` | Max rank Holy Shock |
+| `/qh mt heal` | Optimal Healing Touch on mt only |
 
 ---
 
