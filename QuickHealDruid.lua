@@ -74,29 +74,29 @@ local function GetDruidModifiers()
 end
 
 -- Check for Druid-specific buffs that affect healing
--- Returns: incombat (adjusted), manaLeft (adjusted), healneed (adjusted), buffedHT
+-- Signature de retour : incombat, manaLeft, healneed, buffedHT, forceMax
 local function CheckDruidBuffs(incombat, manaLeft, healneed, mods)
     local buffedHT = false
+    local forceMax = false  -- NOUVEAU
 
-    -- Nampower: use aura spell ID array for reliable detection
     if GetUnitField then
         local success, auras = pcall(GetUnitField, "player", "aura")
         if success and auras then
-            for i = 1, 31 do -- slots 1-31 are buffs
+            for i = 1, 31 do
                 local spellId = auras[i]
                 if spellId and spellId > 0 then
-                    if spellId == 16870 then -- Clearcasting (Omen of Clarity)
-                        QuickHeal_debug("BUFF: Clearcasting [" .. spellId .. "] (Omen of Clarity)")
-                        manaLeft = QH_GetUnitMaxMana('player')
-                        healneed = 10 ^ 6
-                    elseif spellId == 17116 then -- Nature's Swiftness
-                        QuickHeal_debug("BUFF: Nature's Swiftness [" .. spellId .. "] (HT forced)")
+                    if spellId == 16870 then -- Clearcasting
+                        QuickHeal_debug("BUFF: Clearcasting [" .. spellId .. "] (forceMaxHPS activé)")
+                        forceMax = true                          -- NOUVEAU
+                        -- plus de manaLeft/healneed bidouillés ici
+                    elseif spellId == 17116 then
+                        QuickHeal_debug("BUFF: Nature's Swiftness")
                         incombat = false
-                    elseif spellId == 18803 then -- Focus (Hand of Edward the Odd)
-                        QuickHeal_debug("BUFF: Hand of Edward the Odd [" .. spellId .. "] (out of combat healing forced)")
+                    elseif spellId == 18803 then
+                        QuickHeal_debug("BUFF: Hand of Edward the Odd")
                         incombat = false
-                    elseif spellId == 24542 then -- Nimble Healing Touch (Wushoolay's Charm of Nature)
-                        QuickHeal_debug("BUFF: Wushoolay [" .. spellId .. "] (healing touch forced)")
+                    elseif spellId == 24542 then
+                        QuickHeal_debug("BUFF: Wushoolay")
                         buffedHT = true
                     end
                 end
@@ -104,36 +104,28 @@ local function CheckDruidBuffs(incombat, manaLeft, healneed, mods)
         end
     end
 
-    -- Texture-based detection (fallback for buffs not caught by Nampower aura names)
-    -- Detect Clearcasting (from Omen of Clarity)
-    if manaLeft ~= QH_GetUnitMaxMana('player') and
-       QuickHeal_DetectBuff('player', "Spell_Shadow_ManaBurn", 1) then
-        QuickHeal_debug("BUFF: Clearcasting (Omen of Clarity, texture fallback)")
-        manaLeft = QH_GetUnitMaxMana('player')
-        healneed = 10 ^ 6
+    -- Fallback texture : Clearcasting
+    if not forceMax and QuickHeal_DetectBuff('player', "Spell_Shadow_ManaBurn", 1) then
+        QuickHeal_debug("BUFF: Clearcasting (texture fallback, forceMaxHPS activé)")
+        forceMax = true
     end
 
-    -- Detect Nature's Swiftness (next nature spell is instant cast)
+    -- Fallbacks texture restants (inchangés)
     if incombat and QuickHeal_DetectBuff('player', "Spell_Nature_RavenForm") then
         QuickHeal_debug("BUFF: Nature's Swiftness (texture fallback)")
         incombat = false
     end
-
-    -- Detect Hand of Edward the Odd (next spell is instant cast)
-    -- Note: Must exclude "Protective Light" which uses icon "Spell_Holy_SearingLightPriest"
     if incombat and QuickHeal_DetectBuff('player', "Spell_Holy_SearingLight") and
        not QuickHeal_DetectBuff('player', "Spell_Holy_SearingLightPriest") then
         QuickHeal_debug("BUFF: Hand of Edward the Odd (texture fallback)")
         incombat = false
     end
-
-    -- Detect Wushoolay's Charm of Nature (Trinket from Zul'Gurub)
     if not buffedHT and QuickHeal_DetectBuff('player', "Spell_Nature_Regenerate") then
         QuickHeal_debug("BUFF: Wushoolay (texture fallback)")
         buffedHT = true
     end
 
-    return incombat, manaLeft, healneed, buffedHT
+    return incombat, manaLeft, healneed, buffedHT, forceMax  -- NOUVEAU : +forceMax
 end
 
 function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceMaxHPS, maxhealth, healDeficit, hdb, incombat)
@@ -178,8 +170,9 @@ function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceM
     local mods = GetDruidModifiers()
     local ManaLeft = QH_GetUnitMana('player')
 
-    local buffedHT
-    incombat, ManaLeft, healneed, buffedHT = CheckDruidBuffs(incombat, ManaLeft, healneed, mods)
+    local ccForceMax
+	incombat, ManaLeft, healneed, buffedHT, ccForceMax = CheckDruidBuffs(incombat, ManaLeft, healneed, mods)
+	forceMaxHPS = forceMaxHPS or ccForceMax  -- Clearcasting active forceMaxHPS
 
     -- Nature's Grace tweak
     if not target and QuickHeal_DetectBuff('player', "Spell_Nature_NaturesBlessing") and
