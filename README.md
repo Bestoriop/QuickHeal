@@ -47,9 +47,9 @@ Examples: `/qh mt` heals only tanks. `/qh party hot` casts a HoT on a party memb
 
 ### HPS Modes
 
-**Normal HPS**: Uses the full spell pyramid (Lesser Heal / Heal / Greater Heal, Healing Touch, Holy Light, Healing Wave) for mana efficiency.
+**Normal HPS**: Uses the highest HPM spells (Lesser Heal / Heal / Greater Heal, Healing Touch, Flash of Light, Healing Wave) for mana efficiency.
 
-**High HPS**: Restricted to fast-cast spells (Flash Heal, Regrowth, Flash of Light, Lesser Healing Wave) for maximum throughput at the cost of mana.
+**High HPS**: Restricted to High HPS spells (Flash Heal, Regrowth, Holy Light, Lesser Healing Wave) for maximum throughput at the cost of mana.
 
 Toggle with `/qh toggle`.
 
