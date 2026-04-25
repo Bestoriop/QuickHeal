@@ -178,9 +178,31 @@ function QuickHeal_Priest_FindHealSpellToUse(target, healType, multiplier, force
     local healMod15, healMod20, healMod25, healMod30 = mods.healMod15, mods.healMod20, mods.healMod25, mods.healMod30
 
     -- =========================
+    -- FORCE GREATER HEAL (MAX RANK)
+    -- =========================
+
+    if (forceGH or healType == "gh") and forceMaxHPS then
+        if Health < QuickHealVariables.RatioFull or QHV.TestMode or (QHV.PrecastAggro and QuickHeal_UnitHasAggro(target)) then
+            if ManaLeft >= 370 * ihMod and maxRankGH >= 1 and downRankNH >= 8 and SpellIDsGH[1] then
+                SpellID = SpellIDsGH[1]; HealSize = (956 * shMod + healMod30)
+            end
+            if ManaLeft >= 455 * ihMod and maxRankGH >= 2 and SpellIDsGH[2] then
+                SpellID = SpellIDsGH[2]; HealSize = (1219 * shMod + healMod30)
+            end
+            if ManaLeft >= 545 * ihMod and maxRankGH >= 3 and SpellIDsGH[3] then
+                SpellID = SpellIDsGH[3]; HealSize = (1523 * shMod + healMod30)
+            end
+            if ManaLeft >= 655 * ihMod and maxRankGH >= 4 and SpellIDsGH[4] then
+                SpellID = SpellIDsGH[4]; HealSize = (1902 * shMod + healMod30)
+            end
+            if ManaLeft >= 710 * ihMod and maxRankGH >= 5 and SpellIDsGH[5] then
+                SpellID = SpellIDsGH[5]; HealSize = (2080 * shMod + healMod30)
+            end
+        end
+    -- =========================
     -- FORCE GREATER HEAL
     -- =========================
-    if (forceGH or healType == "gh") and ManaLeft >= 370 * ihMod and maxRankGH >= 1 and downRankNH >= 8 and SpellIDsGH[1] then
+    elseif (forceGH or healType == "gh") and ManaLeft >= 370 * ihMod and maxRankGH >= 1 and downRankNH >= 8 and SpellIDsGH[1] then
         if Health < QuickHealVariables.RatioFull or QHV.TestMode or (QHV.PrecastAggro and QuickHeal_UnitHasAggro(target)) then
             SpellID = SpellIDsGH[1]; HealSize = (956 * shMod + healMod30) 
 
@@ -436,28 +458,35 @@ function QuickHealSpellID(healneed)
 end
 
 
-
-
-
 -- Command handler
 function QuickHeal_Command_Priest(msg)
     local _, _, arg1, arg2, arg3 = string.find(msg, "%s?(%w+)%s?(%w+)%s?(%w+)")
+
+    -- Helper local pour éviter la répétition
+    local function isValidTarget(t)
+        return t == "player" or t == "target" or t == "targettarget"
+            or t == "party" or t == "subgroup" or t == "mt" or t == "nonmt"
+    end
 
     -- =========================
     -- Match 3 arguments
     -- =========================
     if arg1 and arg2 and arg3 then
-        if arg1 == "player" or arg1 == "target" or arg1 == "targettarget" or arg1 == "party" or arg1 == "subgroup" or arg1 == "mt" or arg1 == "nonmt" then
+        if isValidTarget(arg1) then
             if arg2 == "heal" and arg3 == "max" then
                 QuickHeal(arg1, nil, nil, true)
                 return
             end
-            if arg2 == "hot" and arg3 == "spam" then
-                QuickHOT(arg1, nil, nil, true, true)
+            if arg2 == "gh" and arg3 == "max" then
+                QuickHeal(arg1, nil, {healType = "gh"}, true)
                 return
             end
             if arg2 == "hot" and arg3 == "max" then
                 QuickHOT(arg1, nil, nil, true, false)
+                return
+            end
+            if arg2 == "hot" and arg3 == "spam" then
+                QuickHOT(arg1, nil, nil, true, true)
                 return
             end
         end
@@ -467,15 +496,17 @@ function QuickHeal_Command_Priest(msg)
     -- Match 2 arguments
     -- =========================
     local _, _, arg4, arg5 = string.find(msg, "%s?(%w+)%s?(%w+)")
-
     if arg4 and arg5 then
+
         -- Debug
         if arg4 == "debug" then
             if arg5 == "on" then
                 QHV.DebugMode = true
+                writeLine("QuickHeal: Debug mode enabled", 0, 1, 0)
                 return
             elseif arg5 == "off" then
                 QHV.DebugMode = false
+                writeLine("QuickHeal: Debug mode disabled", 1, 1, 0)
                 return
             end
         end
@@ -493,9 +524,13 @@ function QuickHeal_Command_Priest(msg)
             end
         end
 
-        -- Global commands
+        -- Global commands (no target)
         if arg4 == "heal" and arg5 == "max" then
             QuickHeal(nil, nil, nil, true)
+            return
+        end
+        if arg4 == "gh" and arg5 == "max" then
+            QuickHeal(nil, nil, {healType = "gh"}, true)
             return
         end
         if arg4 == "hot" and arg5 == "max" then
@@ -507,18 +542,18 @@ function QuickHeal_Command_Priest(msg)
             return
         end
 
-        -- Masked commands
-        if arg4 == "player" or arg4 == "target" or arg4 == "targettarget" or arg4 == "party" or arg4 == "subgroup" or arg4 == "mt" or arg4 == "nonmt" then
-            if arg5 == "hot" then
-                QuickHOT(arg4, nil, nil, false, false)
-                return
-            end
+        -- Target + type commands
+        if isValidTarget(arg4) then
             if arg5 == "heal" then
                 QuickHeal(arg4, nil, nil, false)
                 return
             end
             if arg5 == "gh" then
                 QuickHeal(arg4, nil, {healType = "gh"})
+                return
+            end
+            if arg5 == "hot" then
+                QuickHOT(arg4, nil, nil, false, false)
                 return
             end
         end
@@ -529,6 +564,7 @@ function QuickHeal_Command_Priest(msg)
     -- =========================
     local cmd = string.lower(msg or "")
 
+    -- Settings
     if cmd == "cfg" then
         QuickHeal_ToggleConfigurationPanel()
         return
@@ -557,24 +593,26 @@ function QuickHeal_Command_Priest(msg)
         return
     end
 
-    -- New GH command
-    if cmd == "gh" then
-        QuickHeal(nil, nil, {healType = "gh"})
-        return
-    end
-
+    -- Heal commands
     if cmd == "heal" then
         QuickHeal()
+        return
+    end
+    if cmd == "gh" then
+        QuickHeal(nil, nil, {healType = "gh"})
         return
     end
     if cmd == "hot" then
         QuickHOT()
         return
     end
+
+    -- Empty or target-only
     if cmd == "" then
         QuickHeal(nil)
         return
-    elseif cmd == "player" or cmd == "target" or cmd == "targettarget" or cmd == "party" or cmd == "subgroup" or cmd == "mt" or cmd == "nonmt" then
+    end
+    if isValidTarget(cmd) then
         QuickHeal(cmd)
         return
     end
@@ -583,44 +621,49 @@ function QuickHeal_Command_Priest(msg)
     -- Help
     -- =========================
     writeLine("== QUICKHEAL PRIEST ==")
-    
-    -- Core usage
     writeLine(" ")
-    writeLine("Basic usage:")
-    writeLine("/qh [target] [type] [mode]")
-    
+    writeLine("Usage: /qh [target] [type] [mode]")
+
+    writeLine(" ")
     writeLine("Targets:")
-    writeLine(" player | target | targettarget | party | mt | nonmt | subgroup")
-    
+    writeLine("  player | target | targettarget | party | mt | nonmt | subgroup")
+
+    writeLine(" ")
     writeLine("Types:")
-    writeLine(" heal  - Smart heal (uses slider logic)")
-    writeLine(" gh    - Force Greater Heal")
-    writeLine(" hot   - Renew")
-    
+    writeLine("  heal   - Smart heal (slider logic)")
+    writeLine("  gh     - Force Greater Heal (smart rank)")
+    writeLine("  hot    - Renew")
+
+    writeLine(" ")
     writeLine("Modes:")
-    writeLine(" max   - Use highest rank (FH / Renew)")
-    writeLine(" spam  - Ignore HP, spam max Renew")
-    
-    -- Examples
+    writeLine("  max    - Max rank by mana only (heal / gh / renew)")
+    writeLine("  spam   - Ignore HP, spam max Renew")
+
     writeLine(" ")
     writeLine("Examples:")
-    writeLine("/qh                 - Smart heal depending on slider")
-    writeLine("/qh heal max        - Max rank Flash Heal")
-    writeLine("/qh hot spam        - Spam max Renew")
-    
-    -- Settings
+    writeLine("  /qh                    - Smart heal")
+    writeLine("  /qh heal               - Smart heal (explicit)")
+    writeLine("  /qh heal max           - Max rank Flash Heal")
+    writeLine("  /qh gh                 - Greater Heal (smart rank)")
+    writeLine("  /qh gh max             - Greater Heal max rank (mana only)")
+    writeLine("  /qh target gh max      - Greater Heal max rank on target")
+    writeLine("  /qh hot                - Smart Renew")
+    writeLine("  /qh hot max            - Max rank Renew")
+    writeLine("  /qh hot spam           - Spam max Renew")
+    writeLine("  /qh party heal         - Smart heal party")
+    writeLine("  /qh mt gh max          - GH max rank on main tanks")
+
     writeLine(" ")
     writeLine("Settings:")
-    writeLine("/qh cfg             - Open config")
-    writeLine("/qh toggle          - Switch HPS mode (slider)")
-    writeLine("/qh downrank | dr   - Limit usable ranks")
-    writeLine("/qh tanklist | tl   - Toggle tank list")
-    writeLine("/qh reset           - Reset settings")
-    
-    -- Debug
+    writeLine("  /qh cfg                - Open config panel")
+    writeLine("  /qh toggle             - Switch HPS mode (slider)")
+    writeLine("  /qh downrank | dr      - Manage usable ranks")
+    writeLine("  /qh tanklist | tl      - Toggle tank list")
+    writeLine("  /qh reset              - Reset to defaults")
+
     writeLine(" ")
     writeLine("Other:")
-    writeLine("/qh test on|off     - Test mode")
-    writeLine("/qh debug on|off    - Debug mode")
-    writeLine("/qh dll             - DLL status")
+    writeLine("  /qh test on|off        - Test mode")
+    writeLine("  /qh debug on|off       - Debug mode")
+    writeLine("  /qh dll                - DLL status")
 end
