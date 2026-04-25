@@ -489,7 +489,7 @@ function QuickHeal_Druid_FindHoTSpellToUse(target, healType, forceMaxRank, maxhe
     if healType == "hot" then
         if not forceMaxRank then
             -- Select rank based on healneed
-            SpellID = SpellIDsRJ[1]; HealSize = (36 + healMod15) * genMod * gonMod
+            SpellID = SpellIDsRJ[1]; HealSize = (36* genMod * gonMod + healMod15) 
             if healneed > (60* genMod * gonMod + healMod15) * k and ManaLeft >= 40 * mgMod and maxRankRJ >= 2 and SpellIDsRJ[2] then
                 SpellID = SpellIDsRJ[2]; HealSize = (60* genMod * gonMod + healMod15) 
             end
@@ -500,9 +500,9 @@ function QuickHeal_Druid_FindHoTSpellToUse(target, healType, forceMaxRank, maxhe
                 SpellID = SpellIDsRJ[4]; HealSize = (180* genMod * gonMod + healMod15) 
             end
             if healneed > (246* genMod * gonMod + healMod15) * k and ManaLeft >= 135 * mgMod and maxRankRJ >= 5 and SpellIDsRJ[5] then
-                SpellID = SpellIDsRJ[5]; HealSize = (246 + healMod15) * genMod * gonMod
+                SpellID = SpellIDsRJ[5]; HealSize = (246* genMod * gonMod + healMod15) 
             end
-            if healneed > (306 + healMod15) * genMod * gonMod * k and ManaLeft >= 160 * mgMod and maxRankRJ >= 6 and SpellIDsRJ[6] then
+            if healneed > (306* genMod * gonMod + healMod15) * k and ManaLeft >= 160 * mgMod and maxRankRJ >= 6 and SpellIDsRJ[6] then
                 SpellID = SpellIDsRJ[6]; HealSize = (306* genMod * gonMod + healMod15) 
             end
             if healneed > (390* genMod * gonMod + healMod15) * k and ManaLeft >= 195 * mgMod and maxRankRJ >= 7 and SpellIDsRJ[7] then
