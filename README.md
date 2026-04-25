@@ -125,21 +125,12 @@ Cast Swiftmend (works while moving).
 
 | Command | Description |
 |---------|-------------|
-| `/qh` | Optimal Healing Wave or Lesser Healing Wave |
-| `/qh chainheal` | Chain Heal on lowest health target |
-| `/qh chainheal max` | Max rank Chain Heal |
-
-### Recommended Macros
-
-```
-/qh
-```
-Basic heal — selects optimal Healing Wave or Lesser Healing Wave rank.
-
-```
-/qh chainheal
-```
-Cast Chain Heal on the lowest health target.
+| `/qh` or `/qh heal` | Optimal Healing Wave or Lesser Healing Wave |
+| `/qh heal max` | Lesser Healing Wave max rank only |
+| `/qh hw` | Healing Wave only |
+| `/qh hw max` | Healing Wave max rank only |
+| `/qh chainheal` | Chain Heal only |
+| `/qh chainheal max` | Chain Heal max rank only |
 
 ---
 
