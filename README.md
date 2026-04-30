@@ -109,11 +109,15 @@ Cast Swiftmend (works while moving).
 
 | Command | Description |
 |---------|-------------|
-| `/qh` or `/qh heal` | Optimal Holy Light or Flash of Light |
-| `/qh heal max` | Max rank Flash of Light or Holy Light |
-| `/qh hs` | Holy Shock on lowest health target |
+| `/qh` or `/qh heal` | Optimal Holy Light or Flash of Light with slider logic |
+| `/qh heal max` | Max rank Holy Light or Flash of Light with slider logic |
+| `/qh hl` | Optimal Holy Light |
+| `/qh hl max` | Max rank Holy Light |
+| `/qh fl` | Optimal Flash of light |
+| `/qh fl` | Max rank Flash of light |
+| `/qh hs` | Optimal Holy Shock |
 | `/qh hs max` | Max rank Holy Shock |
-| `/qh mt heal` | Optimal Healing Touch on mt only |
+| `/qh mt heal` | Optimal HL or FL on mt only |
 
 ---
 
