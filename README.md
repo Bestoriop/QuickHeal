@@ -19,10 +19,6 @@ Download QuickHeal into your `Interface/AddOns` folder. Ensure the folder is nam
 | `/qh debug on\|off` | Toggle debug output |
 | `/qh reset` | Reset configuration to defaults |
 
-### Target Masks
-
-Constrain who can be healed by adding a mask before the command:
-
 ### Heal Types
 
 | Suffix | Effect |
@@ -38,7 +34,9 @@ Constrain who can be healed by adding a mask before the command:
 | `max` | always use max rank regardless the healneed |
 | `spam` | specific to HoT - Max Rank Spam ignoring HP check |
 
-### Targets filters
+### Targets masks
+
+Constrain who can be healed by adding a mask before the command:
 
 | Mask | Targets |
 |------|---------|
@@ -50,7 +48,9 @@ Constrain who can be healed by adding a mask before the command:
 | `mt` | Main tanks only |
 | `nonmt` | Non-tanks only |
 
-Examples: `/qh mt` heals only tanks. `/qh party hot` casts a HoT on a party member.
+Examples: 
+`/qh mt` heals only tanks
+`/qh party hot` casts a HoT on a party member.
 
 
 ### HPS Modes
