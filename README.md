@@ -23,6 +23,23 @@ Download QuickHeal into your `Interface/AddOns` folder. Ensure the folder is nam
 
 Constrain who can be healed by adding a mask before the command:
 
+### Heal Types
+
+| Suffix | Effect |
+|--------|--------|
+| `heal` | Direct heal (default) |
+| `hot` | HoT spell (Renew, Rejuvenation) |
+| `hs` | Holy Shock for paladins |
+
+### Modifiers
+
+| Suffix | Effect |
+|--------|--------|
+| `max` | always use max rank regardless the healneed |
+| `spam` | specific to HoT - Max Rank Spam ignoring HP check |
+
+### Targets filters
+
 | Mask | Targets |
 |------|---------|
 | `player` | Yourself only |
@@ -35,15 +52,6 @@ Constrain who can be healed by adding a mask before the command:
 
 Examples: `/qh mt` heals only tanks. `/qh party hot` casts a HoT on a party member.
 
-### Heal Types and Modifiers
-
-| Suffix | Effect |
-|--------|--------|
-| `heal` | Direct heal (default) |
-| `hot` | HoT spell (Renew, Rejuvenation) |
-| `heal max` | Direct heal at max rank |
-| `hot max` | Hot Max rank |
-| `hot spam` | HoT Max Rank Spam ignoring HP check |
 
 ### HPS Modes
 
@@ -64,8 +72,8 @@ Toggle with `/qh toggle`.
 | Command | Description |
 |---------|-------------|
 | `/qh` or `/qh heal` | Optimal direct heal on lowest health target |
-| `/qh gh` | Force GH heal usage (T2 8p bonus) |
-| `/qh heal max` | Flash Heal Max rank |
+| `/qh gh` | Force Greater Heal (T2 8p bonus) |
+| `/qh fl` | Force Flash Heal  |
 | `/qh hot` | Renew on lowest health target without an active HoT |
 | `/qh hot max` | Renew Max rank  |
 | `/qh hot spam` | Renew Max rank Spam ignoring HP check |
