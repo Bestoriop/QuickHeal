@@ -1296,12 +1296,12 @@ local function Initialise()
         -- Configure for Paladin
         QuickHealDownrank_Slider_NH:SetMinMaxValues(1, 9); -- Holy Light ranks
         QuickHealDownrank_Slider_NH:SetValue(QuickHealVariables.DownrankValueNH or 9);
-        QuickHealDownrank_Slider_FH:SetMinMaxValues(1, 7); -- Flash of Light ranks
-        QuickHealDownrank_Slider_FH:SetValue(QuickHealVariables.DownrankValueFH or 7);
+        QuickHealDownrank_Slider_FH:SetMinMaxValues(1, 6); -- Flash of Light ranks
+        QuickHealDownrank_Slider_FH:SetValue(QuickHealVariables.DownrankValueFH or 6);
 
         QuickHealMinrank_Slider_NH:SetMinMaxValues(1, 9);
         QuickHealMinrank_Slider_NH:SetValue(QuickHealVariables.MinrankValueNH);
-        QuickHealMinrank_Slider_FH:SetMinMaxValues(1, 7);
+        QuickHealMinrank_Slider_FH:SetMinMaxValues(1, 6);
         QuickHealMinrank_Slider_FH:SetValue(QuickHealVariables.MinrankValueFH);
 
         QuickHealDownrank_Label_NH:SetText("Holy Light");
