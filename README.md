@@ -72,11 +72,13 @@ Toggle with `/qh toggle`.
 | Command | Description |
 |---------|-------------|
 | `/qh` or `/qh heal` | Optimal direct heal on lowest health target |
-| `/qh gh` | Force Greater Heal (T2 8p bonus) |
-| `/qh fl` | Force Flash Heal  |
-| `/qh hot` | Renew on lowest health target without an active HoT |
-| `/qh hot max` | Renew Max rank  |
-| `/qh hot spam` | Renew Max rank Spam ignoring HP check |
+| `/qh gh` | Optimal Greater Heal (T2 8p bonus) |
+| `/qh gh max` | Max rank Greater Heal |
+| `/qh fl` | Optimal Flash Heal  |
+| `/qh fl max` | Max rank Flash Heal  |
+| `/qh hot` | Optimal Renew |
+| `/qh hot max` | Max rank Renew  |
+| `/qh hot spam` | Max rank Renew even if full HP |
 | `/qh mt heal` | Optimal direct heal on MT only |
 
 ---
@@ -133,16 +135,18 @@ Cast Swiftmend (works while moving).
 
 **Spells used**: Healing Wave, Lesser Healing Wave, Chain Heal
 
-### Commands
+### Recommended Macros
 
 | Command | Description |
 |---------|-------------|
-| `/qh` or `/qh heal` | Optimal Healing Wave or Lesser Healing Wave |
-| `/qh heal max` | Lesser Healing Wave max rank only |
-| `/qh hw` | Healing Wave only |
-| `/qh hw max` | Healing Wave max rank only |
-| `/qh chainheal` | Chain Heal only |
-| `/qh chainheal max` | Chain Heal max rank only |
+| `/qh` or `/qh heal` | Optimal Healing Wave or Lesser Healing Wave with slider logic |
+| `/qh heal max` | Max Healing Wave or Lesser Healing Wave with slider logic  |
+| `/qh hw` | Optimal Healing Wave |
+| `/qh hw max` | Max rank Healing Wave |
+| `/qh lhw` | Optimal Lesser Healing Wave |
+| `/qh lhw max` | Max rank Lesser Healing Wave |
+| `/qh chainheal` | Optimal Chain Heal |
+| `/qh chainheal max` | Max rank Chain Heal |
 
 ---
 
