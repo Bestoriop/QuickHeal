@@ -1,9 +1,10 @@
-# QuickHeal for vanilla 1.12
+# QuickHeal for octo wow
+
 QuickHeal automates healing spell selection and targeting for healers. It finds the lowest health party or raid member, picks the best spell rank for the deficit and your mana, and casts it — no manual targeting required. Works with Priest, Druid, Paladin, and Shaman.
 
 ## Installation
 
-Download QuickHeal into your `Interface/AddOns` folder. Ensure the folder is named `QuickHeal` (remove any `-vanilla-1.12` suffix).
+Download QuickHeal into your `Interface/AddOns` folder. Ensure the folder is named `QuickHeal` (remove any `-octo` suffix).
 
 ## General Commands
 
