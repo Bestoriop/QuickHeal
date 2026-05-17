@@ -171,11 +171,11 @@ function QuickHeal_Shaman_FindChainHealSpellToUse(target, healType, multiplier, 
             SpellID = SpellIDsCH[3]; HealSize = (607 + healModCH) * tmMod
         end
         -- Upgrade to rank 2 if heal need exceeds threshold
-        if healneed > (898 * puMod + healModCH) * tmMod * K and ManaLeft >= 315 * tfMod and maxRankCH >= 2 and minRankCH <= 2 and downRankCH >= 2 and SpellIDsCH[2] then
+        if healneed > (673 * puMod + healModCH) * tmMod * K and ManaLeft >= 315 * tfMod and maxRankCH >= 2 and minRankCH <= 2 and downRankCH >= 2 and SpellIDsCH[2] then
             SpellID = SpellIDsCH[2]; HealSize = (449 * puMod + healModCH) * tmMod
         end
         -- Upgrade to rank 3 if heal need exceeds threshold
-        if healneed > (1213 * puMod + healModCH) * tmMod * K and ManaLeft >= 405 * tfMod and maxRankCH >= 3 and minRankCH <= 3 and downRankCH >= 3 and SpellIDsCH[3] then
+        if healneed > (910 * puMod + healModCH) * tmMod * K and ManaLeft >= 405 * tfMod and maxRankCH >= 3 and minRankCH <= 3 and downRankCH >= 3 and SpellIDsCH[3] then
             SpellID = SpellIDsCH[3]; HealSize = (607 * puMod + healModCH) * tmMod
         end
     else
@@ -247,8 +247,8 @@ function QuickHeal_Shaman_FindHealSpellToUse(target, healType, multiplier, force
 
     debug(string.format("Found HW up to rank %d, and found LHW up to rank %d", maxRankHW, maxRankLHW))
 
-    local downRankFH = QuickHealVariables.DownrankValueFH or 0
-    local downRankNH = QuickHealVariables.DownrankValueNH or 0
+    local downRankFH = QuickHealVariables.DownrankValueFH or 99
+    local downRankNH = QuickHealVariables.DownrankValueNH or 99
     local minRankFH  = QuickHealVariables.MinrankValueFH  or 1
     local minRankNH  = QuickHealVariables.MinrankValueNH  or 1
 
