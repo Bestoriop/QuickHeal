@@ -47,10 +47,15 @@ local function GetPaladinModifiers()
     -- Healing Light - increases healing by 4% per rank
     local hlRank   = QuickHeal_GetTalentRank(1, 6)
     mods.hlMod     = 1 + 4 * hlRank / 100
+
+    -- Divine Favor - increases Holy Shock crit by 10% per rank (0.5 effective bonus per rank)
+    local dfRank   = QuickHeal_GetTalentRank(1, 13)
+    mods.dfMod     = 1 + 5 * dfRank / 100
     
     -- Holy Power - increases Holy Spell crit by 1% per rank (0.5 effective bonus per rank)
     local hpRank   = QuickHeal_GetTalentRank(1, 15)
     mods.hpMod     = 1 + 0.5 * hpRank / 100
+    
     return mods
 end
 
@@ -70,7 +75,6 @@ local HOLY_JUDGEMENT_BUFF_IDS = {
 -- Returns: forceHL flag
 local function CheckPaladinBuffs()
     local forceHL = false
-    local forceMax = false
     
     -- Nampower: use aura spell ID array for reliable detection (no false positives)
     if GetUnitField then
@@ -104,13 +108,7 @@ local function CheckPaladinBuffs()
         forceHL = true
     end
 
-    -- Divine Favor → forceMax (next Holy Light/Flash of Light guaranteed crit)
-    if QuickHeal_DetectBuff('player', "Spell_Holy_Heal") then
-        QuickHeal_debug("BUFF: Divine Favor → forceMax")
-        forceMax = true
-    end
-
-    return forceHL, forceMax
+    return forceHL
 end
 
 -- =========================
@@ -383,7 +381,7 @@ function QuickHeal_Paladin_FindHealSpellToUseNoTarget(maxhealth, healDeficit, he
 end
 
 -- =========================
--- HOLY SHOCK (HoT slot)
+-- HOLY SHOCK 
 -- =========================
 function QuickHeal_Paladin_FindHoTSpellToUse(target, healType, forceMaxRank,
                                               maxhealth, healDeficit, hdb, incombat)
@@ -432,6 +430,7 @@ function QuickHeal_Paladin_FindHoTSpellToUse(target, healType, forceMaxRank,
 
     local hlMod    = mods.hlMod
     local hpMod    = mods.hpMod
+    local dfMod    = mods.dfMod
     local healMod15 = mods.healMod15
 
     debug(string.format(
@@ -441,27 +440,27 @@ function QuickHeal_Paladin_FindHoTSpellToUse(target, healType, forceMaxRank,
     if forceMaxRank then
         if maxRankHS >= 1 then
             SpellID  = SpellIDsHS[maxRankHS]
-            HealSize = (655 + healMod15) * hlMod * hpMod
+            HealSize = (655 + healMod15) * hlMod * dfMod
         end
     else
         if maxRankHS >= 1 and SpellIDsHS[1] then
             SpellID  = SpellIDsHS[1]
-            HealSize = (315 + healMod15) * hlMod * hpMod
+            HealSize = (315 + healMod15) * hlMod * dfMod
         end
-        if healneed > (360 + healMod15) * hlMod * hpMod
+        if healneed > (360 + healMod15) * hlMod * dfMod
             and ManaLeft >= 335 and maxRankHS >= 2 and SpellIDsHS[2] then
             SpellID  = SpellIDsHS[2]
-            HealSize = (360 + healMod15) * hlMod * hpMod
+            HealSize = (360 + healMod15) * hlMod * dfMod
         end
-        if healneed > (500 + healMod15) * hlMod * hpMod
+        if healneed > (500 + healMod15) * hlMod * dfMod
             and ManaLeft >= 410 and maxRankHS >= 3 and SpellIDsHS[3] then
             SpellID  = SpellIDsHS[3]
-            HealSize = (500 + healMod15) * hlMod * hpMod
+            HealSize = (500 + healMod15) * hlMod * dfMod
         end
-        if healneed > (655 + healMod15) * hlMod * hpMod
+        if healneed > (655 + healMod15) * hlMod * dfMod
             and ManaLeft >= 485 and maxRankHS >= 4 and SpellIDsHS[4] then
             SpellID  = SpellIDsHS[4]
-            HealSize = (655 + healMod15) * hlMod * hpMod
+            HealSize = (655 + healMod15) * hlMod * dfMod
         end
     end
 
