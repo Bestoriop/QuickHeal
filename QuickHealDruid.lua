@@ -348,7 +348,7 @@ function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceM
                 }
 
                 for i = maxRankRG, 1, -1 do
-                    if SpellIDsRG[i] and ManaLeft >= manaRG[i] * tsMod * mgMod then
+                    if SpellIDsRG[i] and ManaLeft >= manaRG[i] * mgMod then
                         SpellID = SpellIDsRG[i]
                         HealSize = (healRG[i] * gonMod + healModRG) * iregMod
                         return SpellID, HealSize * HDB
@@ -363,41 +363,41 @@ function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceM
             HealSize = (91 * gonMod + healModRG * PF.RG1) * iregMod
 
             if (healneed > (176 * gonMod + healModRG * PF.RG2) * iregMod * k or 2 <= minRankFH)
-                and ManaLeft >= 205 * tsMod * mgMod and maxRankRG >= 2 and downRankFH >= 2 and SpellIDsRG[2] then
+                and ManaLeft >= 205 * mgMod and maxRankRG >= 2 and downRankFH >= 2 and SpellIDsRG[2] then
                 SpellID = SpellIDsRG[2]; HealSize = (176 * gonMod + healModRG * PF.RG2) * iregMod
             end
 
             if (healneed > (257 * gonMod + healModRG) * iregMod * k or 3 <= minRankFH)
-                and ManaLeft >= 280 * tsMod * mgMod and maxRankRG >= 3 and downRankFH >= 3 and SpellIDsRG[3] then
+                and ManaLeft >= 280 * mgMod and maxRankRG >= 3 and downRankFH >= 3 and SpellIDsRG[3] then
                 SpellID = SpellIDsRG[3]; HealSize = (257 * gonMod + healModRG) * iregMod
             end
             if (healneed > (339 * gonMod + healModRG) * iregMod * k or 4 <= minRankFH)
-                and ManaLeft >= 350 * tsMod * mgMod and maxRankRG >= 4 and downRankFH >= 4 and SpellIDsRG[4] then
+                and ManaLeft >= 350 * mgMod and maxRankRG >= 4 and downRankFH >= 4 and SpellIDsRG[4] then
                 SpellID = SpellIDsRG[4]; HealSize = (339 * gonMod + healModRG) * iregMod
             end
 
             if (healneed > (431 * gonMod + healModRG) * iregMod * k or 5 <= minRankFH)
-                and ManaLeft >= 420 * tsMod * mgMod and maxRankRG >= 5 and downRankFH >= 5 and SpellIDsRG[5] then
+                and ManaLeft >= 420 * mgMod and maxRankRG >= 5 and downRankFH >= 5 and SpellIDsRG[5] then
                 SpellID = SpellIDsRG[5]; HealSize = (431 * gonMod + healModRG) * iregMod
             end
 
             if (healneed > (543 * gonMod + healModRG) * iregMod * k or 6 <= minRankFH)
-                and ManaLeft >= 510 * tsMod * mgMod and maxRankRG >= 6 and downRankFH >= 6 and SpellIDsRG[6] then
+                and ManaLeft >= 510 * mgMod and maxRankRG >= 6 and downRankFH >= 6 and SpellIDsRG[6] then
                 SpellID = SpellIDsRG[6]; HealSize = (543 * gonMod + healModRG) * iregMod
             end
 
             if (healneed > (686 * gonMod + healModRG) * iregMod * k or 7 <= minRankFH)
-                and ManaLeft >= 615 * tsMod * mgMod and maxRankRG >= 7 and downRankFH >= 7 and SpellIDsRG[7] then
+                and ManaLeft >= 615 * mgMod and maxRankRG >= 7 and downRankFH >= 7 and SpellIDsRG[7] then
                 SpellID = SpellIDsRG[7]; HealSize = (686 * gonMod + healModRG) * iregMod
             end
             
             if (healneed > (857 * gonMod + healModRG) * iregMod * k or 8 <= minRankFH)
-                and ManaLeft >= 740 * tsMod * mgMod and maxRankRG >= 8 and downRankFH >= 8 and SpellIDsRG[8] then
+                and ManaLeft >= 740 * mgMod and maxRankRG >= 8 and downRankFH >= 8 and SpellIDsRG[8] then
                 SpellID = SpellIDsRG[8]; HealSize = (857 * gonMod + healModRG) * iregMod
             end
 
             if (healneed > (1061 * gonMod + healModRG) * iregMod * k or 9 <= minRankFH)
-                and ManaLeft >= 880 * tsMod * mgMod and maxRankRG >= 9 and downRankFH >= 9 and SpellIDsRG[9] then
+                and ManaLeft >= 880 * mgMod and maxRankRG >= 9 and downRankFH >= 9 and SpellIDsRG[9] then
                 SpellID = SpellIDsRG[9]; HealSize = (1061 * gonMod + healModRG) * iregMod
             end
         end
