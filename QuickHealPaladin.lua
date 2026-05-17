@@ -398,22 +398,22 @@ function QuickHeal_Paladin_FindHoTSpellToUse(target, healType, forceMaxRank,
     if forceMaxRank then
         if maxRankHS >= 1 then
             SpellID  = SpellIDsHS[maxRankHS]
-            HealSize = (381 * hlMod + healMod15) * hpMod
+            HealSize = (381 + healMod15) * hpMod
         end
     else
         if maxRankHS >= 1 and SpellIDsHS[1] then
             SpellID  = SpellIDsHS[1]
-            HealSize = (213 * hlMod + healMod15) * hpMod
+            HealSize = (213 + healMod15) * hpMod
         end
-        if healneed > (291 * hlMod + healMod15) * hpMod
+        if healneed > (291 + healMod15) * hpMod
             and ManaLeft >= 275 and maxRankHS >= 2 and SpellIDsHS[2] then
             SpellID  = SpellIDsHS[2]
-            HealSize = (291 * hlMod + healMod15) * hpMod
+            HealSize = (291 + healMod15) * hpMod
         end
-        if healneed > (381 * hlMod + healMod15) * hpMod
+        if healneed > (381 + healMod15) * hpMod
             and ManaLeft >= 325 and maxRankHS >= 3 and SpellIDsHS[3] then
             SpellID  = SpellIDsHS[3]
-            HealSize = (381 * hlMod + healMod15) * hpMod
+            HealSize = (381 + healMod15) * hpMod
         end
     end
 
