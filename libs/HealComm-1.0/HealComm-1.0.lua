@@ -454,7 +454,7 @@ function strmatch(str, pat, init)
 end
 
 local function hc_paladin_mods()
-	local _,_,_,_,talentRank,_ = GetTalentInfo(1,5)
+	local _,_,_,_,talentRank,_ = GetTalentInfo(1,6)
 	return 4*talentRank/100 + 1
 end
 
@@ -469,9 +469,9 @@ local function hc_flash_of_light(SpellPower, SpellAmount)
 		local _,_,itemstring = string.find(GetInventoryItemLink("player",GetInventorySlotInfo("RangedSlot")), "|H(.+)|h")
 		local name = GetItemInfo(itemstring)
 		if name == 	L["Libram of Divinity"] then
-			lp = 53
+			lp = 28
 		elseif name == L["Libram of Light"] then
-			lp = 83
+			lp = 41
 		end
 	end
 	local hlMod = hc_paladin_mods()
@@ -479,19 +479,19 @@ local function hc_flash_of_light(SpellPower, SpellAmount)
 end
 
 local function hc_shaman_mods()
-	-- Purification
-	local _,_,_,_,talentRank,_ = GetTalentInfo(3,14)
-	return 2*talentRank/100 + 1
+	-- Tidal Mastery
+	local _,_,_,_,talentRank,_ = GetTalentInfo(3,5)
+	return 0.5*talentRank/100 + 1
 end
 
 local function hc_healing_wave(SpellPower, SpellAmount, Scaling1, Scaling2)
 	local pMod = hc_shaman_mods()
-	return (SpellAmount*pMod)+(((Scaling1) * SpellPower)*Scaling2)
+	return (SpellAmount*pMod+(((Scaling1) * SpellPower)*Scaling2))
 end
 
 local function hc_healing_wave2(SpellPower, SpellAmount)
 	local pMod = hc_shaman_mods()
-	return (SpellAmount*pMod)+((3/3.5) * SpellPower)
+	return (SpellAmount+((3/3.5) * SpellPower)*pMod)
 end
 
 local function hc_lesser_healing_wave(SpellPower, SpellAmount)
@@ -500,72 +500,72 @@ local function hc_lesser_healing_wave(SpellPower, SpellAmount)
 		local _,_,itemstring = string.find(GetInventoryItemLink("player",GetInventorySlotInfo("RangedSlot")), "|H(.+)|h")
 		local name = GetItemInfo(itemstring)
 		if name == L["Totem of Sustaining"] then
-			tp = 53
+			tp = 28
 		elseif name == L["Totem of Life"] then
-			tp = 80
+			tp = 40
 		end
 	end
 	local pMod = hc_shaman_mods()
-	return (SpellAmount*pMod)+tp+((1.5/3.5) * SpellPower)
+	return (SpellAmount+tp+((1.5/3.5) * SpellPower)*pMod)
 end
 
 local function hc_chain_heal(SpellPower, SpellAmount)
 	local pMod = hc_shaman_mods()
-	return (SpellAmount*pMod)+((2.5/3.5) * SpellPower)
+	return (SpellAmount+((2.5/3.5) * SpellPower)*pMod)
 end
 
 local function hc_priest_mods()
-	local _,_,_,_,talentRank,_ = GetTalentInfo(2,14)
+	local _,_,_,_,talentRank,_ = GetTalentInfo(2,12)
 	local _,Spirit,_,_ = UnitStat("player",5)
 	local sgMod = Spirit * 5*talentRank/100
 	local _,_,_,_,talentRank2,_ = GetTalentInfo(2,15)
-	local shMod = 2*talentRank2/100 + 1
+	local shMod = 6*talentRank2/100 + 1
 	return sgMod, shMod
 end
 
 local function hc_lesser_heal(SpellPower, SpellAmount, Scaling1, Scaling2)
 	local sgMod, shMod = hc_priest_mods()
-	return ((SpellAmount*shMod)+((Scaling1) * (SpellPower+sgMod))*Scaling2)
+	return (SpellAmount+((Scaling1) * (SpellPower+sgMod))*Scaling2)*shMod
 end
 
 local function hc_heal(SpellPower, SpellAmount, Scaling)
 	local sgMod, shMod = hc_priest_mods()
-	return ((SpellAmount*shMod)+((3/3.5) * (SpellPower+sgMod))*Scaling)
+	return (SpellAmount+((3/3.5) * (SpellPower+sgMod))*Scaling)*shMod
 end
 
 local function hc_flash_heal(SpellPower, SpellAmount)
 	local sgMod, shMod = hc_priest_mods()
-	return (SpellAmount*shMod)+((1.5/3.5) * (SpellPower+sgMod))
+	return (SpellAmount+((1.5/3.5) * (SpellPower+sgMod)))*shMod
 end
 
 local function hc_greater_heal(SpellPower, SpellAmount)
 	local sgMod, shMod = hc_priest_mods()
-	return (SpellAmount*shMod)+((3/3.5) * (SpellPower+sgMod))
+	return (SpellAmount+((3/3.5) * (SpellPower+sgMod)))*shMod
 end
 
 local function hc_prayer_of_healing(SpellPower, SpellAmount)
 	local sgMod, shMod = hc_priest_mods()
-	return (SpellAmount*shMod)+((3/3.5/3) * (SpellPower+sgMod))
+	return (SpellAmount+((3/3.5/3) * (SpellPower+sgMod)))*shMod
 end
 
 local function hc_druid_mods()
-	local _,_,_,_,talentRank,_ = GetTalentInfo(3,12)
+	local _,_,_,_,talentRank,_ = GetTalentInfo(3,9)
 	return 2*talentRank/100 + 1
 end
 
 local function hc_healing_touch(SpellPower, SpellAmount, Scaling1, Scaling2)
 	local gnMod = hc_druid_mods()
-	return (SpellAmount*gnMod)+((Scaling1) * SpellPower * (Scaling2))
+	return (SpellAmount+((Scaling1) * SpellPower * (Scaling2))*gnMod)
 end
 
 local function hc_healing_touch2(SpellPower, SpellAmount)
 	local gnMod = hc_druid_mods()
-	return ((SpellAmount*gnMod)+SpellPower)
+	return ((SpellAmount+SpellPower)*gnMod)
 end
 
 local function hc_regrowth(SpellPower, SpellAmount, Scaling)
 	local gnMod = hc_druid_mods()
-	return ((SpellAmount*gnMod)+(((2/3.5)*SpellPower)*0.5*Scaling))
+	return ((SpellAmount+(((2/3.5)*SpellPower)*0.5*Scaling))*gnMod)
 end
 
 
@@ -617,6 +617,9 @@ HealComm.Spells = {
 		end;
 		[6] = function (SpellPower)
 			return hc_flash_of_light(SpellPower, 364)
+		end;
+		[7] = function (SpellPower)
+			return hc_flash_of_light(SpellPower, 481)
 		end;
 	};
 	[L["Healing Wave"]] = {
@@ -684,84 +687,84 @@ HealComm.Spells = {
 	};
 	[L["Lesser Heal"]] = {
 		[1] = function (SpellPower)
-			return hc_lesser_heal(SpellPower, 51, 1.5/3.5, 0.19)
+			return hc_lesser_heal(SpellPower, 53, 1.5/3.5, 0.19)
 		end;
 		[2] = function (SpellPower)
-			return hc_lesser_heal(SpellPower, 78, 2/3.5, 0.34)
+			return hc_lesser_heal(SpellPower, 84, 2/3.5, 0.34)
 		end;
 		[3] = function (SpellPower)
-			return hc_lesser_heal(SpellPower, 146, 2.5/3.5, 0.6)
+			return hc_lesser_heal(SpellPower, 154, 2.5/3.5, 0.6)
 		end;
 	};
 	[L["Heal"]] = {
 		[1] = function (SpellPower)
-			return hc_heal(SpellPower, 318, 0.586)
+			return hc_heal(SpellPower, 330, 0.586)
 		end;
 		[2] = function (SpellPower)
-			return hc_heal(SpellPower, 460, 1)
+			return hc_heal(SpellPower, 476, 1)
 		end;
 		[3] = function (SpellPower)
-			return hc_heal(SpellPower, 606, 1)
+			return hc_heal(SpellPower, 624, 1)
 		end;
 		[4] = function (SpellPower)
-			return hc_heal(SpellPower, 758, 1)
+			return hc_heal(SpellPower, 667, 1)
 		end;
 	};
 	[L["Flash Heal"]] = {
 		[1] = function (SpellPower)
-			return hc_flash_heal(SpellPower, 215)
+			return hc_flash_heal(SpellPower, 225)
 		end;
 		[2] = function (SpellPower)
-			return hc_flash_heal(SpellPower, 286)
+			return hc_flash_heal(SpellPower, 297)
 		end;
 		[3] = function (SpellPower)
-			return hc_flash_heal(SpellPower, 360)
+			return hc_flash_heal(SpellPower, 319)
 		end;
 		[4] = function (SpellPower)
-			return hc_flash_heal(SpellPower, 439)
+			return hc_flash_heal(SpellPower, 387)
 		end;
 		[5] = function (SpellPower)
-			return hc_flash_heal(SpellPower, 567)
+			return hc_flash_heal(SpellPower, 498)
 		end;
 		[6] = function (SpellPower)
-			return hc_flash_heal(SpellPower, 704)
+			return hc_flash_heal(SpellPower, 618)
 		end;
 		[7] = function (SpellPower)
-			return hc_flash_heal(SpellPower, 888)
+			return hc_flash_heal(SpellPower, 769)
 		end;
 	};
 	[L["Greater Heal"]] = {
 		[1] = function (SpellPower)
-			return hc_greater_heal(SpellPower, 956)
+			return hc_greater_heal(SpellPower, 838)
 		end;
 		[2] = function (SpellPower)
-			return hc_greater_heal(SpellPower, 1219)
+			return hc_greater_heal(SpellPower, 1066)
 		end;
 		[3] = function (SpellPower)
-			return hc_greater_heal(SpellPower, 1523)
+			return hc_greater_heal(SpellPower, 1328)
 		end;
 		[4] = function (SpellPower)
-			return hc_greater_heal(SpellPower, 1902)
+			return hc_greater_heal(SpellPower, 1632)
 		end;
 		[5] = function (SpellPower)
-			return hc_greater_heal(SpellPower, 2080)
+			return hc_greater_heal(SpellPower, 1768)
 		end;
 	};
 	[L["Prayer of Healing"]] = {
 		[1] = function (SpellPower)
-			return hc_prayer_of_healing(SpellPower, 311)
+			return hc_prayer_of_healing(SpellPower, 323)
 		end;
 		[2] = function (SpellPower)
-			return hc_prayer_of_healing(SpellPower, 458)
+			return hc_prayer_of_healing(SpellPower, 405)
 		end;
 		[3] = function (SpellPower)
-			return hc_prayer_of_healing(SpellPower, 676)
+			return hc_prayer_of_healing(SpellPower, 593)
 		end;
 		[4] = function (SpellPower)
-			return hc_prayer_of_healing(SpellPower, 965)
+			return hc_prayer_of_healing(SpellPower, 820)
 		end;
 		[5] = function (SpellPower)
-			return hc_prayer_of_healing(SpellPower, 1069)
+			return hc_prayer_of_healing(SpellPower, 910)
 		end;
 	};
 	[L["Healing Touch"]] = {
@@ -775,7 +778,7 @@ HealComm.Spells = {
 			return hc_healing_touch(SpellPower, 220, 2.5/3.5, 1)
 		end;
 		[4] = function (SpellPower)
-			return hc_healing_touch(SpellPower, 405, 3/3.5, 1)
+			return hc_healing_touch(SpellPower, 435, 3/3.5, 1)
 		end;
 		[5] = function (SpellPower)
 			return hc_healing_touch2(SpellPower, 634)
