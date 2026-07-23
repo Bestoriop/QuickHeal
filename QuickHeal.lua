@@ -2834,7 +2834,7 @@ local function FindWhoToHeal(Restrict, extParam)
         end
         if not RestrictSubgroup or RestrictParty or not InRaid() or (SubGroup and not QHV["FilterRaidGroup" .. SubGroup]) then
             if not IsBlacklisted(UnitFullName(unit)) then
-                if SpellCanTargetUnit(unit) then
+                if has_superwow or SpellCanTargetUnit(unit) then
                     QuickHeal_debug(string.format("%s (%s) : %d/%d", UnitFullName(unit), unit, QH_GetUnitHealth(unit),
                         QH_GetUnitMaxHealth(unit)));
 
@@ -2900,7 +2900,7 @@ local function FindWhoToHeal(Restrict, extParam)
             end
             if not RestrictSubgroup or RestrictParty or not InRaid() or (SubGroup and not QHV["FilterRaidGroup" .. SubGroup]) then
                 if not IsBlacklisted(UnitFullName(unit)) then
-                    if SpellCanTargetUnit(unit) then
+                    if has_superwow or SpellCanTargetUnit(unit) then
                         QuickHeal_debug(string.format("%s (%s) : %d/%d", UnitFullName(unit), unit, QH_GetUnitHealth(unit),
                             QH_GetUnitMaxHealth(unit)));
                         local Health = QH_GetUnitHealth(unit) / QH_GetUnitMaxHealth(unit);
@@ -2940,7 +2940,7 @@ local function FindWhoToHeal(Restrict, extParam)
                     if QuickHeal_UnitHasAggro(unit) then
                         QuickHeal_debug("    -> Has aggro!");
 
-                        if SpellCanTargetUnit(unit) then
+                        if has_superwow or SpellCanTargetUnit(unit) then
                             QuickHeal_debug("    -> Can target, selecting for precast");
 
                             -- Found an aggro target, select based on preference
@@ -3105,27 +3105,24 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
     local healingTargetMissingHealth = 0;
     local unit;
 
-    -- Clear any healable target
+-- Clear any healable target
     local OldPlaySound = PlaySound;
     PlaySound = function()
     end
     local TargetWasCleared = false;
-    if UnitIsHealable('target') then
-        TargetWasCleared = true;
-        ClearTarget();
-    end
-
-    -- Cast the checkspell
-    CastCheckSpellHOT();
-    if not SpellIsTargeting() then
-        SpellStopCasting(); -- flush any spell Nampower queued instead of targeting mode
-        -- Reacquire target if it was cleared
-        if TargetWasCleared then
-            TargetLastTarget();
+    if not has_superwow then
+        if UnitIsHealable('target') then
+            TargetWasCleared = true;
+            ClearTarget();
         end
-        -- Reinsert the PlaySound
-        PlaySound = OldPlaySound;
-        return false;
+        -- Cast the checkspell
+        CastCheckSpellHOT();
+        if not SpellIsTargeting() then
+            SpellStopCasting();
+            if TargetWasCleared then TargetLastTarget(); end
+            PlaySound = OldPlaySound;
+            return false;
+        end
     end
 
     -- Examine Healable Players
@@ -3136,7 +3133,7 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
         end
         if not RestrictSubgroup or RestrictParty or not InRaid() or (SubGroup and not QHV["FilterRaidGroup" .. SubGroup]) then
             if not IsBlacklisted(UnitFullName(unit)) then
-                if SpellCanTargetUnit(unit) then
+                if has_superwow or SpellCanTargetUnit(unit) then
                     QuickHeal_debug(string.format("%s (%s) : %d/%d", UnitFullName(unit), unit, QH_GetUnitHealth(unit),
                         QH_GetUnitMaxHealth(unit)));
 
@@ -3247,7 +3244,7 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
                     if QuickHeal_UnitHasAggro(unit) then
                         QuickHeal_debug("  Aggro found on: " .. UnitFullName(unit));
 
-                        if SpellCanTargetUnit(unit) then
+                        if has_superwow or SpellCanTargetUnit(unit) then
                             local _, PlayerClass = UnitClass('player');
                             PlayerClass = string.lower(PlayerClass);
                             local canApplyHoT = true;
@@ -3307,7 +3304,7 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
             end
             if not RestrictSubgroup or RestrictParty or not InRaid() or (SubGroup and not QHV["FilterRaidGroup" .. SubGroup]) then
                 if not IsBlacklisted(UnitFullName(unit)) then
-                    if SpellCanTargetUnit(unit) then
+                    if has_superwow or SpellCanTargetUnit(unit) then
                         QuickHeal_debug(string.format("%s (%s) : %d/%d", UnitFullName(unit), unit, QH_GetUnitHealth(unit),
                             QH_GetUnitMaxHealth(unit)));
                         local Health = QH_GetUnitHealth(unit) / QH_GetUnitMaxHealth(unit);
