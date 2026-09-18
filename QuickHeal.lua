@@ -317,6 +317,8 @@ local MAX_MONITOR_DURATION = 15;     -- Safety timeout in seconds
 local BlackList = {};                -- List of times were the players are no longer blacklisted
 local LastBlackListTime = 0;
 local HealMultiplier = 1.0;
+local MonitorCastPending = false;   -- true tant qu'on attend la confirmation Nampower du cast
+local MonitorCastCheckDeadline = 0; -- GetTime() après lequel on abandonne l'attente
 local _, PlayerClass = UnitClass('player');
 PlayerClass = PlayerClass and string.lower(PlayerClass) or "unknown";
 
@@ -1497,6 +1499,20 @@ function QuickHeal_HealingBar_OnUpdate(elapsed)
         return
     end
 
+    -- Libère un monitor bloqué si Nampower n'a jamais réellement lancé le cast
+    -- (ex: rejet silencieux sur GCD), pour ne pas bloquer les tentatives suivantes
+    if MonitorCastPending then
+        local ok, castInfo = pcall(GetCastInfo)
+        if ok and castInfo and castInfo.castRemainingMs and castInfo.castRemainingMs > 0 then
+            MonitorCastPending = false
+        elseif GetTime() >= MonitorCastCheckDeadline then
+            QuickHeal_debug("Cast sur " .. UnitFullName(HealingTarget) .. " jamais enregistré (GCD/CD?), libération du monitor")
+            SpellStopCasting()
+            StopMonitor("Cast never registered")
+            return
+        end
+    end
+
     -- Safety timeout: if monitor has been running too long, something went wrong
     if (GetTime() - MonitorStartTime) > MAX_MONITOR_DURATION then
         QuickHeal_debug("Monitor timeout after " .. MAX_MONITOR_DURATION .. "s, cleaning up")
@@ -1662,6 +1678,7 @@ function StartMonitor(Target, multiplier)
 end
 
 StopMonitor = function(trigger)
+    MonitorCastPending = false;
     QuickHealOverhealStatus:Hide();
     QuickHealOverhealStatusScreenCenter:Hide();
     QuickHealHealingBar:Hide()
@@ -3497,7 +3514,16 @@ local function ExecuteHeal(Target, SpellID)
     if SpellRank == "" then
         SpellRank = nil
     end
-    local SpellNameAndRank = SpellName .. (SpellRank and "(" .. SpellRank .. ")" or "");
+        local SpellNameAndRank = SpellName .. (SpellRank and "(" .. SpellRank .. ")" or "");
+
+    -- Arme une vérification courte : si ce sort a un temps d'incantation,
+    -- on confirmera sous peu que Nampower l'a bien lancé (garde contre un
+    -- rejet silencieux, ex: GCD non détecté d'une capacité comme Bash)
+    if has_nampower and GetCastInfo then
+        local specInfo = QH_GetSpellRecInfo(SpellName)
+        MonitorCastPending = specInfo and specInfo.castTime and specInfo.castTime > 0 or false;
+        MonitorCastCheckDeadline = GetTime() + 0.4;
+    end
 
     QuickHeal_debug("  Casting: " ..
         SpellNameAndRank .. " on " .. UnitFullName(Target) .. " (" .. Target .. ")" .. ", ID: " .. SpellID);
@@ -4311,3 +4337,4 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
+
