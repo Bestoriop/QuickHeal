@@ -74,10 +74,10 @@ local function GetDruidModifiers()
 end
 
 -- Check for Druid-specific buffs that affect healing
--- Signature de retour : incombat, manaLeft, healneed, buffedHT, forceMax
+-- Retour : incombat, manaLeft, healneed, buffedHT, hasCC
 local function CheckDruidBuffs(incombat, manaLeft, healneed, mods)
     local buffedHT = false
-    local forceMax = false  
+    local hasCC = false
 
     if GetUnitField then
         local success, auras = pcall(GetUnitField, "player", "aura")
@@ -86,9 +86,8 @@ local function CheckDruidBuffs(incombat, manaLeft, healneed, mods)
                 local spellId = auras[i]
                 if spellId and spellId > 0 then
                     if spellId == 16870 then -- Clearcasting
-                        QuickHeal_debug("BUFF: Clearcasting [" .. spellId .. "] (forceMaxHPS activé)")
-                        forceMax = true                          -- NOUVEAU
-                        -- plus de manaLeft/healneed bidouillés ici
+                        QuickHeal_debug("BUFF: Clearcasting [" .. spellId .. "] (sort gratuit)")
+                        hasCC = true
                     elseif spellId == 17116 then
                         QuickHeal_debug("BUFF: Nature's Swiftness")
                         incombat = false
@@ -105,12 +104,12 @@ local function CheckDruidBuffs(incombat, manaLeft, healneed, mods)
     end
 
     -- Fallback texture : Clearcasting
-    if not forceMax and QuickHeal_DetectBuff('player', "Spell_Shadow_ManaBurn", 1) then
-        QuickHeal_debug("BUFF: Clearcasting (texture fallback, forceMaxHPS activé)")
-        forceMax = true
+    if not hasCC and QuickHeal_DetectBuff('player', "Spell_Shadow_ManaBurn", 1) then
+        QuickHeal_debug("BUFF: Clearcasting (texture fallback, sort gratuit)")
+        hasCC = true
     end
 
-    -- Fallbacks texture restants (inchangés)
+    -- Fallbacks texture restants
     if incombat and QuickHeal_DetectBuff('player', "Spell_Nature_RavenForm") then
         QuickHeal_debug("BUFF: Nature's Swiftness (texture fallback)")
         incombat = false
@@ -125,7 +124,7 @@ local function CheckDruidBuffs(incombat, manaLeft, healneed, mods)
         buffedHT = true
     end
 
-    return incombat, manaLeft, healneed, buffedHT, forceMax  -- NOUVEAU : +forceMax
+    return incombat, manaLeft, healneed, buffedHT, hasCC
 end
 
 function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceMaxHPS, maxhealth, healDeficit, hdb, incombat)
@@ -170,12 +169,22 @@ function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceM
     local mods = GetDruidModifiers()
     local ManaLeft = QH_GetUnitMana('player')
 
-    local ccForceMax
-	incombat, ManaLeft, healneed, buffedHT, ccForceMax = CheckDruidBuffs(incombat, ManaLeft, healneed, mods)
-	forceMaxHPS = forceMaxHPS or ccForceMax  -- Clearcasting active forceMaxHPS
+    local buffedHT, hasCC
+    incombat, ManaLeft, healneed, buffedHT, hasCC = CheckDruidBuffs(incombat, ManaLeft, healneed, mods)
 
-    -- Nature's Grace tweak
-    if not target and QuickHeal_DetectBuff('player', "Spell_Nature_NaturesBlessing") and
+    -- Clearcasting force le mode max
+    forceMaxHPS = forceMaxHPS or hasCC
+
+    -- Mana utilisé pour la sélection en mode max :
+    -- Clearcasting = sort gratuit, donc on ignore le coût en mana.
+    local maxModeMana = ManaLeft
+    if hasCC then
+        maxModeMana = 1000000
+        debug("Clearcasting actif : coût en mana ignoré en mode max")
+    end
+
+    -- Nature's Grace tweak (désactivé en mode max pour ne pas brider le rang)
+    if not target and not forceMaxHPS and QuickHeal_DetectBuff('player', "Spell_Nature_NaturesBlessing") and
         healneed < ((219 + mods.healMod25 * PF[14]) * mods.gonMod * 2.8) and
         not QuickHeal_DetectBuff('player', "Spell_Nature_Regenerate") then
         ManaLeft = 110 * mods.tsMod * mods.mgMod
@@ -220,25 +229,22 @@ function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceM
     -- =========================
     -- HEAL TYPE RESOLUTION
     -- =========================
+    local forceHT = (healType == "ht") or buffedHT
+    local forceRG = (healType == "rg")
 
-	local forceHT = (healType == "ht") or buffedHT
-	local forceRG = (healType == "rg")
-	
-	local useHT
-	
-	if forceHT then
-	    useHT = true
-	
-	elseif forceRG then
-	    useHT = false
-	
-	else
-	    if not incombat then
-	        useHT = true
-	    else
-	        useHT = (TargetIsHealthy or maxRankRG < 1 or not target)
-	    end
-	end
+    local useHT
+
+    if forceHT then
+        useHT = true
+    elseif forceRG then
+        useHT = false
+    else
+        if not incombat then
+            useHT = true
+        else
+            useHT = (TargetIsHealthy or maxRankRG < 1 or not target)
+        end
+    end
 
     -- =========================
     -- HEALING TOUCH
@@ -264,7 +270,7 @@ function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceM
                 }
 
                 for i = maxRankHT, 1, -1 do
-                    if SpellIDsHT[i] and ManaLeft >= manaHT[i] * tsMod * mgMod then
+                    if SpellIDsHT[i] and maxModeMana >= manaHT[i] * tsMod * mgMod then
                         SpellID = SpellIDsHT[i]
                         HealSize = healHT[i] * gonMod
                         return SpellID, HealSize * HDB
@@ -289,35 +295,35 @@ function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceM
                 SpellID = SpellIDsHT[3]
                 HealSize = (219 + healMod25 * PF[14]) * gonMod
             end
-	        if (healneed > (404 + healMod30) * gonMod * K or 4 <= minRankNH) 
+            if (healneed > (404 + healMod30) * gonMod * K or 4 <= minRankNH)
                 and ManaLeft >= 185 * tsMod * mgMod and maxRankHT >= 4 and downRankNH >= 4 and SpellIDsHT[4] then
                 SpellID = SpellIDsHT[4]; HealSize = (404 + healMod30) * gonMod
             end
-            if (healneed > (633 + healMod35) * gonMod * K or 5 <= minRankNH) 
+            if (healneed > (633 + healMod35) * gonMod * K or 5 <= minRankNH)
                 and ManaLeft >= 270 * tsMod * mgMod and maxRankHT >= 5 and downRankNH >= 5 and SpellIDsHT[5] then
                 SpellID = SpellIDsHT[5]; HealSize = (633 + healMod35) * gonMod
             end
-            if (healneed > (818 + healMod35) * gonMod * K or 6 <= minRankNH) 
+            if (healneed > (818 + healMod35) * gonMod * K or 6 <= minRankNH)
                 and ManaLeft >= 335 * tsMod * mgMod and maxRankHT >= 6 and downRankNH >= 6 and SpellIDsHT[6] then
                 SpellID = SpellIDsHT[6]; HealSize = (818 + healMod35) * gonMod
             end
-            if (healneed > (1028 + healMod35) * gonMod * K or 7 <= minRankNH) 
+            if (healneed > (1028 + healMod35) * gonMod * K or 7 <= minRankNH)
                 and ManaLeft >= 405 * tsMod * mgMod and maxRankHT >= 7 and downRankNH >= 7 and SpellIDsHT[7] then
                 SpellID = SpellIDsHT[7]; HealSize = (1028 + healMod35) * gonMod
             end
-            if (healneed > (1313 + healMod35) * gonMod * K or 8 <= minRankNH) 
+            if (healneed > (1313 + healMod35) * gonMod * K or 8 <= minRankNH)
                 and ManaLeft >= 495 * tsMod * mgMod and maxRankHT >= 8 and downRankNH >= 8 and SpellIDsHT[8] then
                 SpellID = SpellIDsHT[8]; HealSize = (1313 + healMod35) * gonMod
             end
-            if (healneed > (1656 + healMod35) * gonMod * K or 9 <= minRankNH) 
+            if (healneed > (1656 + healMod35) * gonMod * K or 9 <= minRankNH)
                 and ManaLeft >= 600 * tsMod * mgMod and maxRankHT >= 9 and downRankNH >= 9 and SpellIDsHT[9] then
                 SpellID = SpellIDsHT[9]; HealSize = (1656 + healMod35) * gonMod
             end
-            if (healneed > (2060 + healMod35) * gonMod * K or 10 <= minRankNH) 
+            if (healneed > (2060 + healMod35) * gonMod * K or 10 <= minRankNH)
                 and ManaLeft >= 720 * tsMod * mgMod and maxRankHT >= 10 and downRankNH >= 10 and SpellIDsHT[10] then
                 SpellID = SpellIDsHT[10]; HealSize = (2060 + healMod35) * gonMod
             end
-            if (healneed > (2472 + healMod35) * gonMod * K or 11 <= minRankNH) 
+            if (healneed > (2472 + healMod35) * gonMod * K or 11 <= minRankNH)
                 and ManaLeft >= 800 * tsMod * mgMod and maxRankHT >= 11 and downRankNH >= 11 and SpellIDsHT[11] then
                 SpellID = SpellIDsHT[11]; HealSize = (2472 + healMod35) * gonMod
             end
@@ -348,7 +354,7 @@ function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceM
                 }
 
                 for i = maxRankRG, 1, -1 do
-                    if SpellIDsRG[i] and ManaLeft >= manaRG[i] * tsMod * mgMod then
+                    if SpellIDsRG[i] and maxModeMana >= manaRG[i] * tsMod * mgMod then
                         SpellID = SpellIDsRG[i]
                         HealSize = (healRG[i] * gonMod + healModRG) * iregMod
                         return SpellID, HealSize * HDB
@@ -390,7 +396,7 @@ function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceM
                 and ManaLeft >= 492 * tsMod * mgMod and maxRankRG >= 7 and downRankFH >= 7 and SpellIDsRG[7] then
                 SpellID = SpellIDsRG[7]; HealSize = (686 * gonMod + healModRG) * iregMod
             end
-            
+
             if (healneed > (857 * gonMod + healModRG) * iregMod * k or 8 <= minRankFH)
                 and ManaLeft >= 592 * tsMod * mgMod and maxRankRG >= 8 and downRankFH >= 8 and SpellIDsRG[8] then
                 SpellID = SpellIDsRG[8]; HealSize = (857 * gonMod + healModRG) * iregMod
@@ -405,6 +411,7 @@ function QuickHeal_Druid_FindHealSpellToUse(target, healType, multiplier, forceM
 
     return SpellID, HealSize * HDB
 end
+
 
 -- NoTarget wrapper for backwards compatibility
 function QuickHeal_Druid_FindHealSpellToUseNoTarget(maxhealth, healDeficit, healType, multiplier, forceMaxHPS,
