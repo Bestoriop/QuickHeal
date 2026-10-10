@@ -33,7 +33,7 @@ Download QuickHeal into your `Interface/AddOns` folder. Ensure the folder is nam
 | Suffix | Effect |
 |--------|--------|
 | `max` | always use max rank regardless the healneed |
-| `spam` | specific to HoT - Max Rank Spam ignoring HP check |
+| `spam` | specific to HoT or regrowth - Max Rank Spam ignoring HP check on lowest target without active hot |
 
 ### Targets masks
 
@@ -98,9 +98,10 @@ Toggle with `/qh toggle`.
 | `/qh ht max` | Max rank Healing Touch only |
 | `/qh rg` | Optimal Regrowth only |
 | `/qh rg max` | Max rank Regrowth only |
-| `/qh hot` | Rejuvenation on lowest health target without an active HoT |
-| `/qh hot max` | Rejuvenation Max rank on lowest health target without an active HoT |
-| `/qh hot spam` | Rejuvenation Max rank Spam ignoring hp check |
+| `/qh rg spam` | Max rank Regrowth on lowest target without an active HoT, ignoring hp check |
+| `/qh hot` | Rejuvenation on lowest target without an active HoT |
+| `/qh hot max` | Max rank Rejuvenation on lowest without an active HoT |
+| `/qh hot spam` | Max rank Rejuvenation on lowest without an active HoT, ignoring hp check |
 | `/qh mt ht` | Optimal Healing Touch on mt only |
 
 ### Other useful Macros
