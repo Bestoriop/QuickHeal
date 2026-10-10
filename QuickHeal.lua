@@ -2740,6 +2740,36 @@ function CastCheckSpellHOT()
     --QuickHeal_debug("********** BREAKPOINT: CastCheckSpellHOT() done **********");
 end
 
+
+-- Returns true if the check spell can enter targeting mode right now (no GCD, no queued cast).
+-- Used by the shortcut paths of FindWhoToHeal (self preservation / target priority) that
+-- return a unit before the regular CastCheckSpell, so that ExecuteHeal/StartMonitor are
+-- never reached for a cast that Nampower would reject.
+local function QH_CheckHealSpellReady()
+    local OldPlaySound = PlaySound;
+    PlaySound = function()
+    end
+    local TargetWasCleared = false;
+    if UnitIsHealable('target') then
+        TargetWasCleared = true;
+        ClearTarget();
+    end
+
+    CastCheckSpell();
+    local ready = SpellIsTargeting() and true or false;
+    if ready then
+        SpellStopTargeting();
+    else
+        SpellStopCasting(); -- flush any spell Nampower queued instead of targeting mode
+    end
+
+    if TargetWasCleared then
+        TargetLastTarget();
+    end
+    PlaySound = OldPlaySound;
+    return ready;
+end
+
 local function FindWhoToHeal(Restrict, extParam)
     local playerIds = {};
     local petIds = {};
@@ -2751,6 +2781,12 @@ local function FindWhoToHeal(Restrict, extParam)
     local selfPercentage = (QH_GetUnitHealth('player') + HealComm:getHeal('player')) / QH_GetUnitMaxHealth('player');
     if (selfPercentage < QHV.RatioForceself) and (selfPercentage < QHV.RatioFull) then
         QuickHeal_debug("********** Self Preservation **********");
+        -- This shortcut skips the regular CastCheckSpell below, which is what normally
+        -- filters out casts rejected by the GCD. Run the same check here.
+        if not QH_CheckHealSpellReady() then
+            QuickHeal_debug("Self Preservation: check spell not castable (GCD/queue), skipping this call");
+            return false;
+        end
         return 'player';
     end
 
@@ -2758,6 +2794,10 @@ local function FindWhoToHeal(Restrict, extParam)
     if QHV.TargetPriority and QuickHeal_UnitHasHealthInfo('target') then
         if (QH_GetUnitHealth('target') / QH_GetUnitMaxHealth('target')) < QHV.RatioFull or QHV.TestMode then
             QuickHeal_debug("********** Target Priority **********");
+            if not QH_CheckHealSpellReady() then
+                QuickHeal_debug("Target Priority: check spell not castable (GCD/queue), skipping this call");
+                return false;
+            end
             return 'target';
         end
     end
@@ -3018,6 +3058,7 @@ local function FindWhoToHeal(Restrict, extParam)
 
     return healingTarget;
 end
+
 
 local function FindWhoToHOT(Restrict, extParam, noHpCheck)
     local playerIds = {};
@@ -4337,4 +4378,5 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
+
 
