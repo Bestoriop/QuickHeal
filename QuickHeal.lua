@@ -843,6 +843,12 @@ function UnitHasRejuvenation(unit)
     return QuickHeal_HasBuff(unit, "Rejuvenation", 'Interface\\Icons\\Spell_Nature_Rejuvenation')
 end
 
+-- Returns true if unit has Regrowth buff
+function UnitHasRegrowth(unit)
+    return QuickHeal_HasBuff(unit, "Regrowth", 'Interface\\Icons\\Spell_Nature_ResistNature')
+end
+
+
 -- Returns true if the player is in a raid group
 function InRaid()
     return (GroupstatusInt() == 2);
@@ -3061,12 +3067,17 @@ end
 
 
 local function FindWhoToHOT(Restrict, extParam, noHpCheck)
+    -- HoT druide dont on verifie la presence : Regrowth pour /qh rg spam, sinon Rejuvenation
+    local UnitHasDruidHoT = UnitHasRejuvenation;
+    if extParam and extParam.hotType == "rg" then
+        UnitHasDruidHoT = UnitHasRegrowth;
+    end
     local playerIds = {};
     local petIds = {};
     local i;
     local AllPlayersAreFull = true;
     local AllPetsAreFull = true;
-
+ 
     -- Self Preservation (uses accurate health with Nampower)
     local selfPercentage = (QH_GetUnitHealth('player') + HealComm:getHeal('player')) / QH_GetUnitMaxHealth('player');
     if (selfPercentage < QHV.RatioForceself) and (selfPercentage < QHV.RatioFull) then
@@ -3076,15 +3087,15 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
                 return 'player';
             end
         elseif PlayerClass == "druid" then
-            if not UnitHasRejuvenation('player') then
+            if not UnitHasDruidHoT('player') then
                 return 'player';
             end
         elseif PlayerClass == "paladin" then
             return 'player';
         end
     end
-
-
+ 
+ 
     -- Target Priority (uses accurate health with Nampower)
     if QHV.TargetPriority and QuickHeal_UnitHasHealthInfo('target') then
         if (QH_GetUnitHealth('target') / QH_GetUnitMaxHealth('target')) < QHV.RatioFull or QHV.TestMode then
@@ -3094,7 +3105,7 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
                     return 'target';
                 end
             elseif PlayerClass == "druid" then
-                if not UnitHasRejuvenation('target') then
+                if not UnitHasDruidHoT('target') then
                     return 'target';
                 end
             elseif PlayerClass == "paladin" then
@@ -3102,8 +3113,8 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
             end
         end
     end
-
-
+ 
+ 
     -- Heal party/raid etc.
     local RestrictParty = false;
     local RestrictSubgroup = false;
@@ -3124,7 +3135,7 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
     else
         QuickHeal_debug("********** HoT **********");
     end
-
+ 
     -- Fill playerIds and petIds with healable targets
     if (InRaid() and not RestrictParty) then
         for i = 1, GetNumRaidMembers() do
@@ -3157,13 +3168,13 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
             end
         end
     end
-
+ 
     local healingTarget = nil;
     local healingTargetHealth = 100000;
     local healingTargetHealthPct = 1;
     local healingTargetMissingHealth = 0;
     local unit;
-
+ 
 -- Clear any healable target
     local OldPlaySound = PlaySound;
     PlaySound = function()
@@ -3183,7 +3194,7 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
             return false;
         end
     end
-
+ 
     -- Examine Healable Players
     for unit, i in playerIds do
         local SubGroup = false;
@@ -3195,17 +3206,17 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
                 if has_superwow or SpellCanTargetUnit(unit) then
                     QuickHeal_debug(string.format("%s (%s) : %d/%d", UnitFullName(unit), unit, QH_GetUnitHealth(unit),
                         QH_GetUnitMaxHealth(unit)));
-
+ 
                     local _, PlayerClass = UnitClass('player');
                     PlayerClass = string.lower(PlayerClass);
-
+ 
                     local IncHeal = HealComm:getHeal(UnitName(unit))
                     local unitHealth = QH_GetUnitHealth(unit)
                     local unitMaxHealth = QH_GetUnitMaxHealth(unit)
                     local PredictedHealth = (unitHealth + IncHeal)
                     local PredictedHealthPct = (unitHealth + IncHeal) / unitMaxHealth;
                     local PredictedMissingHealth = unitMaxHealth - unitHealth - IncHeal;
-
+ 
                     if noHpCheck then
                         if PlayerClass == "priest" then
                             if not UnitHasRenew(unit) then
@@ -3216,7 +3227,7 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
                                 end
                             end
                         elseif PlayerClass == "druid" then
-                            if not UnitHasRejuvenation(unit) then
+                            if not UnitHasDruidHoT(unit) then
                                 if PredictedHealthPct < healingTargetHealthPct or healingTargetHealthPct == 1 then
                                     healingTarget = unit;
                                     healingTargetHealthPct = PredictedHealthPct;
@@ -3243,11 +3254,11 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
                         --local PredictedHealth = (UnitHealth(unit) + IncHeal)
                         --local PredictedHealthPct = (UnitHealth(unit) + IncHeal) / UnitHealthMax(unit);
                         --local PredictedMissingHealth = UnitHealthMax(unit) - UnitHealth(unit) - IncHeal;
-
+ 
                         if PredictedHealthPct < QHV.RatioFull or QHV.TestMode then
                             local _, PlayerClass = UnitClass('player');
                             PlayerClass = string.lower(PlayerClass);
-
+ 
                             if PlayerClass == "priest" then
                                 if PredictedMissingHealth > healingTargetMissingHealth then
                                     if not UnitHasRenew(unit) then
@@ -3258,7 +3269,7 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
                                 end
                             elseif PlayerClass == "druid" then
                                 if PredictedMissingHealth > healingTargetMissingHealth then
-                                    if not UnitHasRejuvenation(unit) then
+                                    if not UnitHasDruidHoT(unit) then
                                         healingTarget = unit;
                                         healingTargetMissingHealth = PredictedMissingHealth;
                                         AllPlayersAreFull = false;
@@ -3288,11 +3299,11 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
             end
         end
     end
-
+ 
     -- Check for aggro targets if PreHOTAggro is enabled
     if QHV.PreHOTAggro and AllPlayersAreFull and (AllPetsAreFull or QHV.PetPriority == 0) then
         QuickHeal_debug("********** Pre-HOT Aggro Check **********");
-
+ 
         for unit, i in pairs(playerIds) do
             local SubGroup = false;
             if InRaid() and not RestrictParty and RestrictSubgroup and i <= GetNumRaidMembers() then
@@ -3302,20 +3313,20 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
                 if not IsBlacklisted(UnitFullName(unit)) then
                     if QuickHeal_UnitHasAggro(unit) then
                         QuickHeal_debug("  Aggro found on: " .. UnitFullName(unit));
-
+ 
                         if has_superwow or SpellCanTargetUnit(unit) then
                             local _, PlayerClass = UnitClass('player');
                             PlayerClass = string.lower(PlayerClass);
                             local canApplyHoT = true;
-
+ 
                             if PlayerClass == "priest" then
                                 if UnitHasRenew(unit) then canApplyHoT = false end
                             elseif PlayerClass == "druid" then
-                                if UnitHasRejuvenation(unit) then canApplyHoT = false end
+                                if UnitHasDruidHoT(unit) then canApplyHoT = false end
                             -- elseif PlayerClass == "paladin" then
                                 -- Paladin HoT logic (Holy Shock usually direct heal, but checks might apply)
                             end
-
+ 
                             if canApplyHoT then
                                 if not healingTarget then
                                     healingTarget = unit;
@@ -3327,7 +3338,7 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
                                     -- Preference logic
                                     local currentMaxHealth = QH_GetUnitMaxHealth(healingTarget);
                                     local candidateMaxHealth = QH_GetUnitMaxHealth(unit);
-
+ 
                                     if QHV.PreHOTAggroPreference == "LOWEST_MAX_HEALTH" then
                                         if candidateMaxHealth < currentMaxHealth then
                                             healingTarget = unit;
@@ -3385,14 +3396,14 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
             end
         end
     end
-
+ 
     -- Reacquire target if it was cleared earlier, and stop CheckSpell
     SpellStopTargeting();
     if TargetWasCleared then
         TargetLastTarget();
     end
     PlaySound = OldPlaySound;
-
+ 
     -- Examine External Target
     if AllPlayersAreFull and (AllPetsAreFull or QHV.PetPriority == 0) then
         if not QuickHeal_UnitHasHealthInfo('target') and UnitIsHealable('target', true) then
@@ -3405,9 +3416,10 @@ local function FindWhoToHOT(Restrict, extParam, noHpCheck)
             end
         end
     end
-
+ 
     return healingTarget;
 end
+
 
 
 local function Notification(unit, spellName)
@@ -4219,7 +4231,7 @@ local function QuickHOT_Inner(Target, SpellID, extParam, forceMaxRank, noHpCheck
     if not (type(extParam) == "table") then
         extParam = {};
     end
-
+ 
     local Restrict = nil;
     if Target then Target = string.lower(Target) end
     if Target == "party" or Target == "subgroup" then
@@ -4234,7 +4246,7 @@ local function QuickHOT_Inner(Target, SpellID, extParam, forceMaxRank, noHpCheck
             return;
         end
     end
-
+ 
     -- Clear hostile target only for Paladin
     local hadHostileTarget = false;
     if UnitClass("player") == "Paladin" then
@@ -4243,7 +4255,7 @@ local function QuickHOT_Inner(Target, SpellID, extParam, forceMaxRank, noHpCheck
             ClearTarget();
         end
     end
-
+ 
     if Target then
         QuickHeal_debug("********** Heal " .. Target .. " **********");
         if UnitIsHealable(Target, true) then
@@ -4253,7 +4265,7 @@ local function QuickHOT_Inner(Target, SpellID, extParam, forceMaxRank, noHpCheck
             else
                 targetPercentage = QH_GetUnitHealth(Target) / 100;
             end
-            if targetPercentage >= QHV.RatioFull then
+            if targetPercentage >= QHV.RatioFull and not noHpCheck then
                 Message(string.format("%s doesn't need healing", UnitFullName(Target) or Target), "Info", 2);
                 if hadHostileTarget then TargetLastTarget(); end
                 return;
@@ -4285,10 +4297,10 @@ local function QuickHOT_Inner(Target, SpellID, extParam, forceMaxRank, noHpCheck
             return;
         end
     end
-
+ 
     QuickHeal_debug(string.format("  Healing target: %s (%s)", UnitFullName(Target), Target));
     HealingSpellSize = 0;
-
+ 
     if not SpellID then
         SpellID, HealingSpellSize = FindHoTSpellToUse(Target, "hot", forceMaxRank);
     elseif type(SpellID) == "string" then
@@ -4316,7 +4328,7 @@ local function QuickHOT_Inner(Target, SpellID, extParam, forceMaxRank, noHpCheck
             return;
         end
     end
-
+ 
     if SpellID then
         ExecuteHOT(Target, SpellID);
         if hadHostileTarget then TargetLastTarget(); end
@@ -4324,6 +4336,7 @@ local function QuickHOT_Inner(Target, SpellID, extParam, forceMaxRank, noHpCheck
         Message("You have no healing spells to cast", "Error", 2);
     end
 end
+
 
 function QuickHOT(Target, SpellID, extParam, forceMaxRank, noHpCheck)
     -- Block if on GCD or mid-cast to prevent CastCheckSpellHOT() from
