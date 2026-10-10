@@ -568,21 +568,21 @@ function QuickHeal_Druid_FindHoTSpellToUseNoTarget(maxhealth, healDeficit, healT
 end
 
 function QuickHeal_Command_Druid(msg)
-
+ 
     local args = {}
     for word in string.gfind(string.lower(msg), "%S+") do
         table.insert(args, word)
     end
-
+ 
     local a1, a2, a3 = args[1], args[2], args[3]
-
+ 
     -- =========================================================
     -- 3 ARGS (mask + action + mod)
     -- =========================================================
     if a1 and a2 and a3 then
-
+ 
         local mask = a1
-
+ 
         if mask == "player"
         or mask == "target"
         or mask == "targettarget"
@@ -590,31 +590,37 @@ function QuickHeal_Command_Druid(msg)
         or mask == "subgroup"
         or mask == "mt"
         or mask == "nonmt" then
-
+ 
             -- /qh mask heal max
             if a2 == "heal" and a3 == "max" then
                 QuickHeal(mask, nil, nil, true)
                 return
             end
-
+ 
             -- /qh mask ht max
             if a2 == "ht" and a3 == "max" then
                 QuickHeal(mask, nil, { healType = "ht" }, true)
                 return
             end
-
+ 
             -- /qh mask rg max
             if a2 == "rg" and a3 == "max" then
                 QuickHeal(mask, nil, { healType = "rg" }, true)
                 return
             end
-
+ 
+            -- /qh mask rg spam
+            if a2 == "rg" and a3 == "spam" then
+                QuickHOT(mask, QUICKHEAL_SPELL_REGROWTH, { hotType = "rg" }, true, true)
+                return
+            end
+ 
             -- /qh mask hot spam
             if a2 == "hot" and a3 == "spam" then
                 QuickHOT(mask, nil, nil, true, true)
                 return
             end
-
+ 
             -- /qh mask hot max
             if a2 == "hot" and a3 == "max" then
                 QuickHOT(mask, nil, nil, true, false)
@@ -622,42 +628,48 @@ function QuickHeal_Command_Druid(msg)
             end
         end
     end
-
+ 
     -- =========================================================
     -- 2 ARGS (global commands)
     -- =========================================================
     if a1 and a2 then
-
+ 
         -- debug
         if a1 == "debug" then
             QHV.DebugMode = (a2 == "on")
             return
         end
-
+ 
         -- test mode
         if a1 == "test" then
             QHV.TestMode = (a2 == "on")
             writeLine("QuickHeal: Test mode " .. (QHV.TestMode and "ON" or "OFF"))
             return
         end
-
+ 
         -- GLOBAL HEAL MAX (AUTO MODE)
         if a1 == "heal" and a2 == "max" then
             QuickHeal(nil, nil, nil, true)
             return
         end
-
+ 
         -- HOT MODES
         if a1 == "hot" and a2 == "max" then
             QuickHOT(nil, nil, nil, true, false)
             return
         end
-
+ 
         if a1 == "hot" and a2 == "spam" then
             QuickHOT(nil, nil, nil, true, true)
             return
         end
-
+ 
+        -- Regrowth spam (pre-HoT): max rank, ignores the HP check
+        if a1 == "rg" and a2 == "spam" then
+            QuickHOT(nil, QUICKHEAL_SPELL_REGROWTH, { hotType = "rg" }, true, true)
+            return
+        end
+ 
         -- DIRECT TARGET TYPE COMMANDS
         if a1 == "player"
         or a1 == "target"
@@ -666,105 +678,105 @@ function QuickHeal_Command_Druid(msg)
         or a1 == "subgroup"
         or a1 == "mt"
         or a1 == "nonmt" then
-
+ 
             if a2 == "heal" then
                 QuickHeal(a1, nil, nil, false)
                 return
             end
-
+ 
             if a2 == "ht" then
                 QuickHeal(a1, nil, { healType = "ht" }, false)
                 return
             end
-
+ 
             if a2 == "rg" then
                 QuickHeal(a1, nil, { healType = "rg" }, false)
                 return
             end
-
+ 
             if a2 == "hot" then
                 QuickHOT(a1, nil, nil, false, false)
                 return
             end
         end
     end
-
+ 
     -- =========================================================
     -- 1 ARG (simple commands)
     -- =========================================================
     local cmd = string.lower(msg)
-
+ 
     if cmd == "" then
         QuickHeal(nil)
         return
     end
-
+ 
     if cmd == "heal" then
         QuickHeal()
         return
     end
-
+ 
     if cmd == "ht" then
         QuickHeal(nil, nil, { healType = "ht" })
         return
     end
-
+ 
     if cmd == "rg" then
         QuickHeal(nil, nil, { healType = "rg" })
         return
     end
-
+ 
     if cmd == "hot" then
         QuickHOT()
         return
     end
-
+ 
     if cmd == "ht max" then
         QuickHeal(nil, nil, { healType = "ht" }, true)
         return
     end
-
+ 
     if cmd == "rg max" then
         QuickHeal(nil, nil, { healType = "rg" }, true)
         return
     end
-
+ 
     if cmd == "heal max" then
         QuickHeal(nil, nil, nil, true)
         return
     end
-
+ 
     if cmd == "cfg" then
         QuickHeal_ToggleConfigurationPanel()
         return
     end
-
+ 
     if cmd == "toggle" then
         QuickHeal_Toggle_Healthy_Threshold()
         return
     end
-
+ 
     if cmd == "downrank" or cmd == "dr" or cmd == "minrank" or cmd == "ranks" then
         ToggleDownrankWindow()
         return
     end
-
+ 
     if cmd == "tanklist" or cmd == "tl" then
         QH_ShowHideMTListUI()
         return
     end
-
+ 
     if cmd == "reset" then
         QuickHeal_SetDefaultParameters()
         writeLine(QuickHealData.name .. " reset to default configuration")
         return
     end
-
+ 
     if cmd == "dll" then
         QuickHeal_ReportDLLStatus()
         return
     end
-
+ 
 	
     -- Print usage
     writeLine("== QUICKHEAL DRUID ==")
@@ -786,7 +798,7 @@ function QuickHeal_Command_Druid(msg)
     writeLine(" ")
     writeLine("Modes:")
     writeLine(" max   - Use highest rank available")
-    writeLine(" spam  - (HOT only) spam max rank without HP check")
+    writeLine(" spam  - (HOT / RG only) spam max rank without HP check")
     -- =========================================================
     -- EXAMPLES
     -- =========================================================
@@ -799,6 +811,7 @@ function QuickHeal_Command_Druid(msg)
     writeLine("/qh rg              - Force Regrowth (normal rank)")
     writeLine("/qh rg max          - Force max rank Regrowth")
     writeLine("/qh hot spam        - Spam max Rejuvenation")
+    writeLine("/qh rg spam         - Spam max Regrowth (pre-HoT)")
     -- =========================================================
     -- SETTINGS
     -- =========================================================
